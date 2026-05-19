@@ -1,11 +1,12 @@
 'use client';
 import { Users, Zap, AlertTriangle, Calendar } from 'lucide-react';
 import { useEmergency } from '@/context/EmergencyContext';
-import { COMPANIES } from '@/lib/mock-data';
 
 export function StatsCards() {
-  const { workers, liveCount, emergencyHistory } = useEmergency();
-  const company = COMPANIES[0];
+  const { workers, liveCount, emergencyHistory, company, isLoading } = useEmergency();
+  
+  if (isLoading || !company) return null;
+
   const activeWorkers = workers.filter(w => w.status === 'active').length;
   const thisMonth = emergencyHistory.filter(e => {
     const d = new Date(e.startedAt);

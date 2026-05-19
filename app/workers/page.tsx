@@ -5,7 +5,6 @@ import { Search, Plus, X, Phone, Heart, Bandage, Flame, Wind, Brain, Skull } fro
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useEmergency } from '@/context/EmergencyContext';
 import { getBloodTypeColor, getInitials, getWorkerStatusLabel, formatDateTime } from '@/lib/utils';
-import { COMPANIES } from '@/lib/mock-data';
 import type { Worker } from '@/types';
 
 const STATUS_STYLES: Record<string, { color: string; bg: string; pulse?: boolean }> = {
@@ -15,7 +14,7 @@ const STATUS_STYLES: Record<string, { color: string; bg: string; pulse?: boolean
 };
 
 function WorkerSidePanel({ worker, onClose }: { worker: Worker; onClose: () => void }) {
-  const st = STATUS_STYLES[worker.status];
+  const st = STATUS_STYLES[worker.status] || STATUS_STYLES.offline;
   return (
     <motion.div
       initial={{ x: '100%', opacity: 0 }}
@@ -112,11 +111,18 @@ function WorkerSidePanel({ worker, onClose }: { worker: Worker; onClose: () => v
 }
 
 export default function WorkersPage() {
-  const { workers } = useEmergency();
+  const { workers, company, isLoading, authError } = useEmergency();
   const [search, setSearch] = useState('');
   const [unitFilter, setUnitFilter] = useState('');
   const [selected, setSelected] = useState<Worker | null>(null);
-  const company = COMPANIES[0];
+
+  if (authError) {
+    return <DashboardLayout><div className="flex h-full items-center justify-center text-red-500 font-bold text-2xl tracking-widest">{authError}</div></DashboardLayout>;
+  }
+
+  if (isLoading || !company) {
+    return <DashboardLayout><div className="text-white p-8">Chargement...</div></DashboardLayout>;
+  }
 
   const units = [...new Set(workers.map(w => w.unit))];
   const filtered = workers.filter(w => {
@@ -185,7 +191,7 @@ export default function WorkersPage() {
             </thead>
             <tbody>
               {filtered.map((w, i) => {
-                const st = STATUS_STYLES[w.status];
+                const st = STATUS_STYLES[w.status] || STATUS_STYLES.offline;
                 return (
                   <tr key={w.id} style={{ borderBottom: i < filtered.length - 1 ? '1px solid #1A1A1A' : undefined, cursor: 'pointer' }}
                     onClick={() => setSelected(w)}

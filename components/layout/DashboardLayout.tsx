@@ -1,10 +1,11 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sidebar } from './Sidebar';
 import { Navbar } from './Navbar';
 import { useEmergency } from '@/context/EmergencyContext';
 import { useSSE } from '@/hooks/useSSE';
+import { getAuth, getToken } from '@/lib/auth';
 
 function ToastContainer() {
   const { toasts, removeToast } = useEmergency();
@@ -64,7 +65,61 @@ function FlashOverlay() {
 }
 
 function SSEInitializer() {
-  useSSE();
+  const { startEmergency, resolveEmergency, addWorker, addToast } = useEmergency();
+  const [companyId, setCompanyId] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    const auth = getAuth();
+    setCompanyId(auth?.companyId || 'COMP-123'); // Fallback for demo
+    setToken(getToken() || 'mock-token');
+  }, []);
+
+  useSSE(
+    companyId,
+    token,
+    (type, data: any) => {
+      console.log('SSE Event received:', type, data);
+      if (type === 'new_emergency') {
+        startEmergency(data);
+      } else if (type === 'emergency_resolved') {
+        resolveEmergency();
+      } else if (type === 'worker_registered') {
+        // Map backend UserOut to frontend Worker type
+        const newWorker = {
+          id: data.id || Math.random().toString(36).slice(2),
+          employeeId: data.employee_id || '',
+          firstName: data.full_name ? data.full_name.split(' ')[0] : 'Nouveau',
+          lastName: data.full_name ? data.full_name.split(' ').slice(1).join(' ') : 'Travailleur',
+          unit: 'Non assignée',
+          department: 'Non défini',
+          position: 'Employé',
+          phone: data.phone || '',
+          status: 'active',
+          bloodType: 'Inconnu',
+          lastSeen: data.last_seen || new Date().toISOString(),
+          joinDate: data.created_at || new Date().toISOString(),
+          companyId: data.company_id || '',
+          medicalProfile: {
+            bloodType: 'Inconnu',
+            allergies: [],
+            chronicDiseases: [],
+            medications: [],
+            emergencyNotes: '',
+            iceContact: { name: '', relation: '', phone: '' },
+            lastCheckup: ''
+          }
+        };
+        addWorker(newWorker as any);
+        addToast({
+          type: 'info',
+          title: 'Nouveau travailleur',
+          message: `${newWorker.firstName} ${newWorker.lastName} s'est inscrit.`
+        });
+      }
+    }
+  );
+
   return null;
 }
 

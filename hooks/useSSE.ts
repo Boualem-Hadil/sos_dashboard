@@ -1,48 +1,39 @@
-'use client';
 import { useEffect, useRef } from 'react';
-import { useEmergency } from '@/context/EmergencyContext';
-import { MOCK_ACTIVE_EMERGENCY } from '@/lib/mock-data';
-import { useAlarm } from './useAlarm';
+import { createSSEConnection } from '@/lib/api';
 
-export function useSSE() {
-  const { startEmergency, resolveEmergency, addToast } = useEmergency();
-  const { playAlarm, stopAlarm } = useAlarm();
-  const simulatedRef = useRef(false);
+export function useSSE(
+  companyId: string | null,
+  token: string | null,
+  onEvent: (type: string, data: unknown) => void
+) {
+  const eventSourceRef = useRef<EventSource | null>(null);
 
   useEffect(() => {
-    if (simulatedRef.current) return;
-    simulatedRef.current = true;
+    if (!companyId || !token) return;
+    if (false) return;
 
-    // Simulate emergency after 10 seconds
-    const timer = setTimeout(() => {
-      const emergency = { ...MOCK_ACTIVE_EMERGENCY, startedAt: new Date().toISOString() };
-      startEmergency(emergency);
-      playAlarm();
+    // Close existing connection
+    eventSourceRef.current?.close();
 
-      // Browser notification
-      if (typeof window !== 'undefined' && 'Notification' in window) {
-        Notification.requestPermission().then(p => {
-          if (p === 'granted') {
-            new Notification('🚨 URGENCE ACTIVE — SOS Algérie', {
-              body: `${emergency.workerName} • ${emergency.unit}\nUrgence cardiaque critique`,
-              icon: '/favicon.ico',
-            });
+    // Open new connection
+    eventSourceRef.current = createSSEConnection(
+      companyId,
+      token,
+      onEvent,
+      () => {
+        // Auto reconnect after 5 seconds on error
+        setTimeout(() => {
+          if (companyId && token) {
+            eventSourceRef.current = createSSEConnection(
+              companyId, token, onEvent
+            );
           }
-        });
+        }, 5000);
       }
+    );
 
-      addToast({ type: 'error', title: '🚨 Urgence déclenchée', message: `${emergency.workerName} — Cardiaque critique` });
-    }, 10000);
-
-    return () => clearTimeout(timer);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const handleResolve = () => {
-    resolveEmergency();
-    stopAlarm();
-    addToast({ type: 'success', title: '✅ Urgence résolue', message: 'Le panneau d\'urgence a été fermé.' });
-  };
-
-  return { handleResolve };
+    return () => {
+      eventSourceRef.current?.close();
+    };
+  }, [companyId, token]);
 }

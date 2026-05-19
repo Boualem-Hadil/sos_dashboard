@@ -16,7 +16,7 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     await new Promise(r => setTimeout(r, 800));
-    const user = login(form.employeeId, form.password, form.companyCode);
+    const user = await login(form.employeeId, form.password, form.companyCode);
     if (!user) {
       setError('Identifiants incorrects ou code entreprise invalide.');
       setLoading(false);

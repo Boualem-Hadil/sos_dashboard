@@ -100,8 +100,10 @@ export function getBloodTypeColor(bloodType: MedicalProfile['bloodType']): strin
   return colors[bloodType] || '#808080';
 }
 
-export function getInitials(firstName: string, lastName: string): string {
-  return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+export function getInitials(firstName?: string, lastName?: string): string {
+  const f = firstName ? firstName.charAt(0) : '';
+  const l = lastName ? lastName.charAt(0) : '';
+  return `${f}${l}`.toUpperCase() || '??';
 }
 
 export function exportToCSV(data: Record<string, unknown>[], filename: string): void {

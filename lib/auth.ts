@@ -1,24 +1,29 @@
 import type { AuthUser } from '@/types';
+import { loginApi } from './api';
 
-const MOCK_JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJBRE0wMDEiLCJuYW1lIjoiS2FtZWwgQmVuYWxpIiwiY29tcGFueUlkIjoic25hdHJhY2giLCJyb2xlIjoiYWRtaW4ifQ.mock';
+export async function login(
+  employeeId: string,
+  password: string,
+  companyCode: string
+): Promise<AuthUser | null> {
+  try {
+    const response = await loginApi(employeeId, password, companyCode);
+    const data = response.data;
 
-export function login(employeeId: string, _password: string, companyCode: string): AuthUser | null {
-  const companies: Record<string, { id: string; name: string }> = {
-    SNTR: { id: 'sonatrach', name: 'Sonatrach' },
-    CVTL: { id: 'cevital', name: 'CEVITAL' },
-    ARCL: { id: 'arcelormittal', name: 'ArcelorMittal' },
-  };
-  const company = companies[companyCode.toUpperCase()];
-  if (!company) return null;
-  const user: AuthUser = {
-    employeeId,
-    name: 'Kamel Benali',
-    role: 'Responsable Sécurité',
-    companyId: company.id,
-    companyName: company.name,
-    token: MOCK_JWT,
-  };
-  return user;
+    const user: AuthUser = {
+      employeeId: data.user.employee_id,
+      name: data.user.full_name,
+      role: data.user.role,
+      companyId: data.user.company_id,
+      companyName: data.company?.name || '',
+      token: data.access_token,
+    };
+
+    return user;
+  } catch (error) {
+    console.error('Login failed:', error);
+    return null;
+  }
 }
 
 export function saveAuth(user: AuthUser): void {

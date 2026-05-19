@@ -95,9 +95,13 @@ function EmergencyModal({ emergency, onClose }: { emergency: Emergency; onClose:
 }
 
 export default function EmergenciesPage() {
-  const { emergencyHistory } = useEmergency();
+  const { emergencyHistory, authError } = useEmergency();
   const [filters, setFilters] = useState({ type: '', severity: '', status: '', worker: '' });
   const [selected, setSelected] = useState<Emergency | null>(null);
+
+  if (authError) {
+    return <DashboardLayout><div className="flex h-full items-center justify-center text-red-500 font-bold text-2xl tracking-widest">{authError}</div></DashboardLayout>;
+  }
 
   const filtered = useMemo(() => emergencyHistory.filter(e => {
     return (!filters.type || e.type === filters.type)

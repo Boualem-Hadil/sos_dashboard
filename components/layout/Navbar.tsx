@@ -3,11 +3,18 @@ import { useRouter } from 'next/navigation';
 import { LogOut, Bell, User } from 'lucide-react';
 import { logout, getAuth } from '@/lib/auth';
 import { useEmergency } from '@/context/EmergencyContext';
+import { useState, useEffect } from 'react';
 
 export function Navbar() {
   const router = useRouter();
   const { liveCount } = useEmergency();
-  const user = getAuth();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const user = mounted ? getAuth() : null;
 
   const handleLogout = () => {
     logout();
