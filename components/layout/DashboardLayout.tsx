@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sidebar } from './Sidebar';
 import { Navbar } from './Navbar';
+import { EmergencyModal } from '../dashboard/EmergencyModal';
 import { useEmergency } from '@/context/EmergencyContext';
 import { useSSE } from '@/hooks/useSSE';
 import { getAuth, getToken } from '@/lib/auth';
@@ -80,9 +81,35 @@ function SSEInitializer() {
     token,
     (type, data: any) => {
       console.log('SSE Event received:', type, data);
-      if (type === 'new_emergency') {
-        startEmergency(data);
-      } else if (type === 'emergency_resolved') {
+      if (type === 'EMERGENCY_STARTED') {
+        const emergencyData = data.emergency;
+        const userData = data.user;
+        const mappedEmergency = {
+          id: emergencyData.id,
+          workerId: emergencyData.user_id || 'unknown',
+          type: emergencyData.type,
+          severity: emergencyData.severity.toLowerCase(),
+          location: emergencyData.location_description || 'Unknown location',
+          status: emergencyData.status,
+          startedAt: emergencyData.started_at,
+          resolvedAt: emergencyData.resolved_at,
+          workerName: userData ? userData.full_name : 'Unknown Worker',
+          medicalProfile: data.medical_profile ? {
+            bloodType: data.medical_profile.blood_type || 'Inconnu',
+            allergies: data.medical_profile.allergies || [],
+            chronicDiseases: data.medical_profile.chronic_diseases || [],
+            medications: [],
+            emergencyNotes: data.medical_profile.emergency_notes || '',
+            iceContact: {
+              name: data.medical_profile.ice_contact_name || '',
+              relation: data.medical_profile.ice_contact_relation || '',
+              phone: data.medical_profile.ice_contact_phone || '',
+            },
+            lastCheckup: data.medical_profile.updated_at || '',
+          } : undefined
+        };
+        startEmergency(mappedEmergency as any);
+      } else if (type === 'EMERGENCY_RESOLVED') {
         resolveEmergency();
       } else if (type === 'worker_registered') {
         // Map backend UserOut to frontend Worker type
@@ -128,6 +155,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     <>
       <SSEInitializer />
       <FlashOverlay />
+      <EmergencyModal />
       <div className="flex h-screen overflow-hidden" style={{ background: '#0A0A0A' }}>
         <Sidebar />
         <div className="flex flex-col flex-1 overflow-hidden">

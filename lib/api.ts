@@ -155,7 +155,7 @@ export function createSSEConnection(
     onEvent: (type: string, data: unknown) => void,
     onError?: () => void
 ): EventSource {
-    const url = `${BASE_URL}/events/stream?company_id=${companyId}&token=${token}`;
+    const url = `${BASE_URL}/events/stream?company_id=${companyId}&token=${encodeURIComponent(token)}`;
     const eventSource = new EventSource(url);
 
     eventSource.onmessage = (event) => {
@@ -167,8 +167,8 @@ export function createSSEConnection(
         }
     };
 
-    eventSource.onerror = () => {
-        console.error('SSE connection error');
+    eventSource.onerror = (event) => {
+        console.error('SSE connection error:', event);
         onError?.();
     };
 

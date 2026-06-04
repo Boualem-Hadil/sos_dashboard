@@ -10,30 +10,28 @@ export function useSSE(
 
   useEffect(() => {
     if (!companyId || !token) return;
-    if (false) return;
 
     // Close existing connection
-    eventSourceRef.current?.close();
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+    }
 
     // Open new connection
-    eventSourceRef.current = createSSEConnection(
+    const eventSource = createSSEConnection(
       companyId,
       token,
       onEvent,
       () => {
-        // Auto reconnect after 5 seconds on error
-        setTimeout(() => {
-          if (companyId && token) {
-            eventSourceRef.current = createSSEConnection(
-              companyId, token, onEvent
-            );
-          }
-        }, 5000);
+        console.log('SSE encountered an error, browser will attempt to reconnect');
       }
     );
+    eventSourceRef.current = eventSource;
 
     return () => {
-      eventSourceRef.current?.close();
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
     };
   }, [companyId, token]);
 }
