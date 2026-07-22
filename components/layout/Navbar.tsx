@@ -1,19 +1,18 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { LogOut, Bell, User } from 'lucide-react';
+import { LogOut, Bell, User, Sun, Moon } from 'lucide-react';
 import { logout, getAuth } from '@/lib/auth';
 import { useEmergency } from '@/context/EmergencyContext';
+import { useTheme } from '@/context/ThemeContext';
 import { useState, useEffect } from 'react';
 
 export function Navbar() {
   const router = useRouter();
   const { liveCount } = useEmergency();
+  const { theme, toggleTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
+  useEffect(() => { setMounted(true); }, []);
   const user = mounted ? getAuth() : null;
 
   const handleLogout = () => {
@@ -22,42 +21,89 @@ export function Navbar() {
   };
 
   return (
-    <header className="h-16 flex items-center justify-between px-6" style={{ background: '#111111', borderBottom: '1px solid #222' }}>
+    <header
+      className="h-16 flex items-center justify-between px-6 flex-shrink-0"
+      style={{
+        background: 'var(--sos-bg-surface)',
+        borderBottom: '1px solid var(--sos-border)',
+        boxShadow: 'var(--sos-shadow)',
+      }}
+    >
       <div>
-        <div className="font-semibold text-white">{user?.companyName ?? 'SOS Algérie'}</div>
-        <div className="text-xs" style={{ color: '#808080' }}>Tableau de bord de sécurité industrielle</div>
+        <div className="font-semibold text-sm" style={{ color: 'var(--sos-text-primary)' }}>
+          {user?.companyName ?? 'SOS Algérie'}
+        </div>
+        <div className="text-xs" style={{ color: 'var(--sos-text-muted)' }}>
+          Tableau de bord · Surveillance industrielle
+        </div>
       </div>
-      <div className="flex items-center gap-4">
+
+      <div className="flex items-center gap-3">
+        {/* Theme toggle */}
+        <button
+          onClick={toggleTheme}
+          className="w-9 h-9 rounded-lg flex items-center justify-center transition-all hover:scale-105"
+          style={{ background: 'var(--sos-bg-hover)', border: '1px solid var(--sos-border)' }}
+          title={theme === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre'}
+        >
+          {theme === 'dark'
+            ? <Sun className="w-4 h-4" style={{ color: 'var(--sos-warning)' }} />
+            : <Moon className="w-4 h-4" style={{ color: 'var(--sos-text-secondary)' }} />}
+        </button>
+
         {/* Bell */}
         <div className="relative">
-          <button className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors" style={{ background: '#1A1A1A' }}>
-            <Bell className="w-5 h-5" style={{ color: '#808080' }} />
+          <button
+            className="w-9 h-9 rounded-lg flex items-center justify-center transition-all hover:scale-105"
+            style={{ background: 'var(--sos-bg-hover)', border: '1px solid var(--sos-border)' }}
+          >
+            <Bell className="w-4 h-4" style={{ color: 'var(--sos-text-muted)' }} />
           </button>
           {liveCount > 0 && (
-            <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-xs font-bold text-white badge-pulse" style={{ background: '#E53935', fontSize: '10px' }}>
+            <span
+              className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-white badge-pulse"
+              style={{ background: 'var(--sos-accent)', fontSize: '10px', fontWeight: 700 }}
+            >
               {liveCount}
             </span>
           )}
         </div>
 
-        {/* User */}
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg" style={{ background: '#1A1A1A' }}>
-          <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ background: '#E53935' }}>
-            <User className="w-4 h-4" />
+        {/* Divider */}
+        <div className="w-px h-6" style={{ background: 'var(--sos-border)' }} />
+
+        {/* User chip */}
+        <div
+          className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg"
+          style={{ background: 'var(--sos-bg-hover)', border: '1px solid var(--sos-border)' }}
+        >
+          <div
+            className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
+            style={{ background: 'var(--sos-accent)' }}
+          >
+            <User className="w-3.5 h-3.5" />
           </div>
-          <div>
-            <div className="text-sm font-medium text-white">{user?.name ?? 'Utilisateur'}</div>
-            <div className="text-xs" style={{ color: '#808080' }}>{user?.role ?? 'Admin'}</div>
+          <div className="hidden sm:block">
+            <div className="text-xs font-semibold" style={{ color: 'var(--sos-text-primary)' }}>
+              {user?.name ?? 'Utilisateur'}
+            </div>
+            <div className="text-xs" style={{ color: 'var(--sos-text-muted)' }}>
+              {user?.role ?? 'Admin'}
+            </div>
           </div>
         </div>
 
         {/* Logout */}
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:opacity-80"
-          style={{ background: 'rgba(229,57,53,0.1)', color: '#E53935', border: '1px solid rgba(229,57,53,0.3)' }}
+          className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
+          style={{
+            background: 'var(--sos-accent-muted)',
+            color: 'var(--sos-accent)',
+            border: '1px solid var(--sos-accent-border)',
+          }}
         >
-          <LogOut className="w-4 h-4" />
+          <LogOut className="w-3.5 h-3.5" />
           Déconnexion
         </button>
       </div>

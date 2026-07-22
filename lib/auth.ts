@@ -15,7 +15,7 @@ export async function login(
       name: data.user.full_name,
       role: data.user.role,
       companyId: data.user.company_id,
-      companyName: data.company?.name || '',
+      companyName: data.user.company?.name || '',
       token: data.access_token,
     };
 

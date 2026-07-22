@@ -110,6 +110,89 @@
   --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
 }
 
+/* ============================================================
+   SOS Algérie — Semantic Design Tokens
+   Light mode: :root   |   Dark mode: .dark
+   ============================================================ */
+
+:root {
+  /* Backgrounds */
+  --sos-bg-base:       #F5F7FA;
+  --sos-bg-surface:    #FFFFFF;
+  --sos-bg-surface-2:  #F8FAFC;
+  --sos-bg-hover:      #F1F5F9;
+
+  /* Borders */
+  --sos-border:        #E2E8F0;
+  --sos-border-subtle: #EEF2F6;
+
+  /* Text */
+  --sos-text-primary:   #1E293B;
+  --sos-text-secondary: #475569;
+  --sos-text-muted:     #94A3B8;
+
+  /* Accent — emergency red (calmer than pure red) */
+  --sos-accent:        #DC2626;
+  --sos-accent-hover:  #B91C1C;
+  --sos-accent-muted:  rgba(220,38,38,0.08);
+  --sos-accent-border: rgba(220,38,38,0.20);
+
+  /* Sidebar always stays dark — standard dashboard UX */
+  --sos-sidebar-bg:           #1E293B;
+  --sos-sidebar-border:       #2E3F55;
+  --sos-sidebar-text:         #64748B;
+  --sos-sidebar-text-active:  #F1F5F9;
+  --sos-sidebar-active-bg:    rgba(220,38,38,0.12);
+
+  /* Semantic status */
+  --sos-success:        #10B981;
+  --sos-success-muted:  rgba(16,185,129,0.10);
+  --sos-warning:        #F59E0B;
+  --sos-warning-muted:  rgba(245,158,11,0.10);
+  --sos-info:           #3B82F6;
+  --sos-info-muted:     rgba(59,130,246,0.10);
+
+  /* Shadows */
+  --sos-shadow:    0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --sos-shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05);
+  --sos-shadow-lg: 0 10px 20px rgba(0,0,0,0.08), 0 4px 8px rgba(0,0,0,0.04);
+}
+
+.dark {
+  /* Backgrounds — deep navy, NOT pure black */
+  --sos-bg-base:       #0F1623;
+  --sos-bg-surface:    #161E2E;
+  --sos-bg-surface-2:  #1A2535;
+  --sos-bg-hover:      #1E2A3D;
+
+  /* Borders */
+  --sos-border:        #1E293B;
+  --sos-border-subtle: #162032;
+
+  /* Text */
+  --sos-text-primary:   #F1F5F9;
+  --sos-text-secondary: #CBD5E1;
+  --sos-text-muted:     #475569;
+
+  /* Accent */
+  --sos-accent:        #EF4444;
+  --sos-accent-hover:  #DC2626;
+  --sos-accent-muted:  rgba(239,68,68,0.12);
+  --sos-accent-border: rgba(239,68,68,0.28);
+
+  /* Sidebar */
+  --sos-sidebar-bg:           #0A1020;
+  --sos-sidebar-border:       #1A2535;
+  --sos-sidebar-text:         #475569;
+  --sos-sidebar-text-active:  #F1F5F9;
+  --sos-sidebar-active-bg:    rgba(239,68,68,0.12);
+
+  /* Shadows */
+  --sos-shadow:    0 1px 3px rgba(0,0,0,0.4);
+  --sos-shadow-md: 0 4px 8px rgba(0,0,0,0.4);
+  --sos-shadow-lg: 0 10px 20px rgba(0,0,0,0.5);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -173,30 +256,31 @@
 html,
 body {
   height: 100%;
-  background-color: #0A0A0A;
-  color: #FFFFFF;
+  background-color: var(--sos-bg-base);
+  color: var(--sos-text-primary);
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #1A1A1A;
+  background: var(--sos-bg-surface);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #3A3A3A;
+  background: var(--sos-border);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #E53935;
+  background: var(--sos-accent);
 }
 
 /* Pulse animation for emergencies */

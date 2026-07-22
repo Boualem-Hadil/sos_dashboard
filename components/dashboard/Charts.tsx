@@ -3,6 +3,7 @@ import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recha
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { useEmergency } from '@/context/EmergencyContext';
 import { getEmergencyTypeLabel } from '@/lib/utils';
+import type { EmergencyType } from '@/types';
 
 const TYPE_COLORS: Record<string, string> = {
   cardiac: '#E53935', trauma: '#FF9800', fire: '#FF5722',
@@ -18,15 +19,15 @@ export function EmergencyTypeChart() {
       return acc;
     }, {} as Record<string, number>)
   ).map(([type, value]) => ({
-    name: getEmergencyTypeLabel(type),
+    name: getEmergencyTypeLabel(type as EmergencyType),
     value,
     color: TYPE_COLORS[type] || '#808080'
   }));
 
   return (
-    <div className="rounded-xl p-5" style={{ background: '#111111', border: '1px solid #222' }}>
-      <h2 className="text-base font-bold text-white mb-1">Types d&apos;urgences</h2>
-      <p className="text-xs mb-4" style={{ color: '#808080' }}>Distribution par catégorie</p>
+    <div className="rounded-xl p-5" style={{ background: 'var(--sos-bg-surface)', border: '1px solid var(--sos-border)', boxShadow: 'var(--sos-shadow)' }}>
+      <h2 className="text-base font-bold mb-1" style={{ color: 'var(--sos-text-primary)' }}>Types d&apos;urgences</h2>
+      <p className="text-xs mb-4" style={{ color: 'var(--sos-text-secondary)' }}>Distribution par catégorie</p>
       <ResponsiveContainer width="100%" height={220}>
         <PieChart>
           <Pie data={distribution} cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={3} dataKey="value">
@@ -34,8 +35,11 @@ export function EmergencyTypeChart() {
               <Cell key={i} fill={entry.color} />
             ))}
           </Pie>
-          <Tooltip contentStyle={{ background: '#1A1A1A', border: '1px solid #333', borderRadius: 8, color: '#fff' }} />
-          <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11, color: '#808080' }} />
+          <Tooltip 
+            contentStyle={{ background: 'var(--sos-bg-surface-2)', border: '1px solid var(--sos-border)', borderRadius: 8, color: 'var(--sos-text-primary)' }}
+            itemStyle={{ color: 'var(--sos-text-primary)' }}
+          />
+          <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11, color: 'var(--sos-text-secondary)' }} />
         </PieChart>
       </ResponsiveContainer>
     </div>
@@ -65,15 +69,18 @@ export function MonthlyIncidentsChart() {
   }
 
   return (
-    <div className="rounded-xl p-5" style={{ background: '#111111', border: '1px solid #222' }}>
-      <h2 className="text-base font-bold text-white mb-1">Incidents mensuels</h2>
-      <p className="text-xs mb-4" style={{ color: '#808080' }}>7 derniers mois</p>
+    <div className="rounded-xl p-5" style={{ background: 'var(--sos-bg-surface)', border: '1px solid var(--sos-border)', boxShadow: 'var(--sos-shadow)' }}>
+      <h2 className="text-base font-bold mb-1" style={{ color: 'var(--sos-text-primary)' }}>Incidents mensuels</h2>
+      <p className="text-xs mb-4" style={{ color: 'var(--sos-text-secondary)' }}>7 derniers mois</p>
       <ResponsiveContainer width="100%" height={220}>
         <BarChart data={monthlyData} margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#1E1E1E" />
-          <XAxis dataKey="month" tick={{ fill: '#808080', fontSize: 11 }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fill: '#808080', fontSize: 11 }} axisLine={false} tickLine={false} />
-          <Tooltip contentStyle={{ background: '#1A1A1A', border: '1px solid #333', borderRadius: 8, color: '#fff' }} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--sos-border-subtle)" />
+          <XAxis dataKey="month" tick={{ fill: 'var(--sos-text-secondary)', fontSize: 11 }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fill: 'var(--sos-text-secondary)', fontSize: 11 }} axisLine={false} tickLine={false} />
+          <Tooltip 
+            contentStyle={{ background: 'var(--sos-bg-surface-2)', border: '1px solid var(--sos-border)', borderRadius: 8, color: 'var(--sos-text-primary)' }}
+            itemStyle={{ color: 'var(--sos-text-primary)' }}
+          />
           <Bar dataKey="incidents" name="Incidents" fill="#E53935" radius={[4, 4, 0, 0]} />
           <Bar dataKey="resolved" name="Résolus" fill="#4CAF50" radius={[4, 4, 0, 0]} />
         </BarChart>

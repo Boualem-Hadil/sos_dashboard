@@ -110,7 +110,7 @@ interface EmergencyContextValue extends EmergencyState {
 
 const EmergencyContext = createContext<EmergencyContextValue | null>(null);
 
-import { getAuth } from '@/lib/auth';
+import { getAuth, getToken } from '@/lib/auth';
 
 export function EmergencyProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -119,6 +119,26 @@ export function EmergencyProvider({ children }: { children: React.ReactNode }) {
     async function loadData() {
       try {
         const auth = getAuth();
+        const token = getToken();
+
+        // If not logged in, don't attempt to fetch (prevents console error overlay on /login)
+        if (!auth || !token) {
+          dispatch({ type: 'SET_AUTH_ERROR', payload: 'Not authenticated' });
+          if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+            window.location.href = '/login';
+          }
+          return;
+        }
+
+        // Super admins manage the whole platform from /admin — skip company-specific data
+        if (auth?.role === 'super_admin') {
+          dispatch({
+            type: 'SET_INITIAL_DATA',
+            payload: { workers: [], emergencies: [], company: { name: 'SOS Algérie Platform' } },
+          });
+          return;
+        }
+
         const companyId = auth?.companyId || 'COMP-123';
         
         const [fetchedWorkers, fetchedEmergencies, fetchedCompanies] = await Promise.all([
@@ -141,16 +161,29 @@ export function EmergencyProvider({ children }: { children: React.ReactNode }) {
       } catch (err: any) {
         console.error('Failed to load initial data', err);
         const msg = err.message || '';
-        if (msg.includes('permissions') || msg.includes('Access denied') || msg.includes('Forbidden')) {
+        // Determine if it's a genuine auth failure (401/403) vs a generic API error
+        const isAuthError =
+          msg === 'Not authenticated' ||
+          msg === 'Invalid or expired token' ||
+          msg === 'User not found or deactivated' ||
+          msg.toLowerCase().includes('unauthorized') ||
+          err.status === 401;
+        const isPermissionError =
+          msg.includes('permissions') ||
+          msg.includes('Access denied') ||
+          msg.includes('Forbidden') ||
+          err.status === 403;
+
+        if (isPermissionError) {
           dispatch({ type: 'SET_AUTH_ERROR', payload: 'Permission denied' });
-        } else if (msg === 'Not authenticated' || msg.includes('token') || msg.includes('Unauthorized')) {
-          if (window.location.pathname !== '/login') {
+        } else if (isAuthError) {
+          if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
             window.location.href = '/login';
           } else {
-             dispatch({ type: 'SET_AUTH_ERROR', payload: 'Not authenticated' });
+            dispatch({ type: 'SET_AUTH_ERROR', payload: 'Not authenticated' });
           }
         } else {
-          dispatch({ type: 'SET_AUTH_ERROR', payload: 'Failed to load data' });
+          dispatch({ type: 'SET_AUTH_ERROR', payload: msg || 'Failed to load data' });
         }
       }
     }

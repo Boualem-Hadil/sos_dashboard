@@ -20,7 +20,9 @@ async function apiFetch(
     const data = await response.json();
 
     if (!response.ok) {
-        throw new Error(data.message || data.detail || 'Erreur serveur');
+        const error: any = new Error(data.message || data.detail || 'Erreur serveur');
+        error.status = response.status;
+        throw error;
     }
 
     return data;
@@ -173,4 +175,71 @@ export function createSSEConnection(
     };
 
     return eventSource;
+}
+
+// ── Admin ─────────────────────────────────────────────────────────────────────
+export async function getAdminStatsApi(token: string) {
+    return apiFetch('/admin/stats', {}, token);
+}
+
+export async function getAdminCompaniesApi(token: string) {
+    return apiFetch('/admin/companies', {}, token);
+}
+
+export async function createAdminCompanyApi(data: {
+    name: string;
+    industry: string;
+    company_code: string;
+    max_users: number;
+    contact_email?: string;
+    subscription_start?: string;
+    subscription_end?: string;
+}, token: string) {
+    return apiFetch('/admin/companies', { method: 'POST', body: JSON.stringify(data) }, token);
+}
+
+export async function updateAdminCompanyApi(id: string, data: {
+    name?: string;
+    industry?: string;
+    max_users?: number;
+    contact_email?: string;
+    subscription_start?: string;
+    subscription_end?: string;
+    is_active?: boolean;
+}, token: string) {
+    return apiFetch(`/admin/companies/${id}`, { method: 'PUT', body: JSON.stringify(data) }, token);
+}
+
+export async function getExpiringCompaniesApi(token: string, days = 30) {
+    return apiFetch(`/admin/companies/expiring?days=${days}`, {}, token);
+}
+
+export async function getAdminOfficersApi(token: string) {
+    return apiFetch('/admin/officers', {}, token);
+}
+
+export async function createAdminOfficerApi(data: {
+    full_name: string;
+    employee_id: string;
+    password: string;
+    phone?: string;
+    company_id: string;
+}, token: string) {
+    return apiFetch('/admin/officers', { method: 'POST', body: JSON.stringify(data) }, token);
+}
+
+export async function deactivateAdminOfficerApi(userId: string, token: string) {
+    return apiFetch(`/admin/officers/${userId}`, { method: 'DELETE' }, token);
+}
+
+export async function getNotificationRecipientsApi(token: string) {
+    return apiFetch('/admin/notification-recipients', {}, token);
+}
+
+export async function addNotificationRecipientApi(data: { email: string; name: string }, token: string) {
+    return apiFetch('/admin/notification-recipients', { method: 'POST', body: JSON.stringify(data) }, token);
+}
+
+export async function removeNotificationRecipientApi(id: string, token: string) {
+    return apiFetch(`/admin/notification-recipients/${id}`, { method: 'DELETE' }, token);
 }

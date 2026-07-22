@@ -53,7 +53,7 @@ export function LiveEmergencyPanel() {
                 <div className="w-4 h-4 rounded-full bg-red-500" />
                 <div className="absolute inset-0 w-4 h-4 rounded-full bg-red-500 ping-dot" />
               </div>
-              <span className="text-lg font-black text-white tracking-wide">🚨 URGENCE EN COURS</span>
+              <span className="text-lg font-black tracking-wide" style={{ color: 'var(--sos-text-primary)' }}>🚨 URGENCE EN COURS</span>
               <span className="px-3 py-1 rounded-full text-xs font-bold badge-pulse" style={{ background: '#E53935', color: '#fff' }}>
                 {getSeverityLabel(currentEmergency.severity).toUpperCase()}
               </span>
@@ -67,44 +67,44 @@ export function LiveEmergencyPanel() {
           <div className="grid grid-cols-2 gap-5">
             {/* Left: Worker + type */}
             <div className="flex flex-col gap-4">
-              <div className="p-4 rounded-xl" style={{ background: '#1A1A1A', border: '1px solid #333' }}>
-                <div className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#808080' }}>Travailleur</div>
+              <div className="p-4 rounded-xl" style={{ background: 'var(--sos-bg-surface)', border: '1px solid var(--sos-border)' }}>
+                <div className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--sos-text-muted)' }}>Travailleur</div>
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold text-white" style={{ background: '#E53935' }}>
                     {currentEmergency.workerName.charAt(0)}
                   </div>
                   <div>
-                    <div className="text-lg font-bold text-white">{currentEmergency.workerName}</div>
-                    <div className="text-sm font-mono" style={{ color: '#B0B0B0' }}>Badge: {currentEmergency.workerBadge}</div>
-                    <div className="text-sm" style={{ color: '#808080' }}>{currentEmergency.unit}</div>
+                    <div className="text-lg font-bold" style={{ color: 'var(--sos-text-primary)' }}>{currentEmergency.workerName}</div>
+                    <div className="text-sm font-mono" style={{ color: 'var(--sos-text-secondary)' }}>Badge: {currentEmergency.workerBadge}</div>
+                    <div className="text-sm" style={{ color: 'var(--sos-text-muted)' }}>{currentEmergency.unit}</div>
                   </div>
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl" style={{ background: '#1A1A1A', border: '1px solid #333' }}>
-                <div className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#808080' }}>Type d&apos;urgence</div>
+              <div className="p-4 rounded-xl" style={{ background: 'var(--sos-bg-surface)', border: '1px solid var(--sos-border)' }}>
+                <div className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--sos-text-muted)' }}>Type d&apos;urgence</div>
                 <div className="flex items-center gap-3">
                   {TYPE_ICONS[currentEmergency.type]}
-                  <span className="text-lg font-bold text-white">{getEmergencyTypeLabel(currentEmergency.type)}</span>
+                  <span className="text-lg font-bold" style={{ color: 'var(--sos-text-primary)' }}>{getEmergencyTypeLabel(currentEmergency.type)}</span>
                 </div>
                 {currentEmergency.notes && (
-                  <p className="mt-2 text-sm" style={{ color: '#B0B0B0' }}>{currentEmergency.notes}</p>
+                  <p className="mt-2 text-sm" style={{ color: 'var(--sos-text-secondary)' }}>{currentEmergency.notes}</p>
                 )}
               </div>
 
               {/* Location */}
               {currentEmergency.gpsCoordinates && (
-                <div className="p-4 rounded-xl" style={{ background: '#1A1A1A', border: '1px solid #333' }}>
-                  <div className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#808080' }}>Localisation GPS</div>
-                  <div className="text-sm text-white mb-1">{currentEmergency.location}</div>
-                  <div className="text-xs font-mono mb-3" style={{ color: '#808080' }}>
+                <div className="p-4 rounded-xl" style={{ background: 'var(--sos-bg-surface)', border: '1px solid var(--sos-border)' }}>
+                  <div className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--sos-text-muted)' }}>Localisation GPS</div>
+                  <div className="text-sm mb-1" style={{ color: 'var(--sos-text-primary)' }}>{currentEmergency.location}</div>
+                  <div className="text-xs font-mono mb-3" style={{ color: 'var(--sos-text-muted)' }}>
                     {currentEmergency.gpsCoordinates.lat.toFixed(4)}, {currentEmergency.gpsCoordinates.lng.toFixed(4)}
                   </div>
                   <a
                     href={`https://maps.google.com/?q=${currentEmergency.gpsCoordinates.lat},${currentEmergency.gpsCoordinates.lng}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
                     style={{ background: 'rgba(33,150,243,0.15)', border: '1px solid rgba(33,150,243,0.3)', color: '#2196F3' }}
                   >
                     <MapPin className="w-4 h-4" /> Ouvrir dans Maps
@@ -116,11 +116,11 @@ export function LiveEmergencyPanel() {
             {/* Right: Medical profile */}
             {currentEmergency.medicalProfile && (
               <div className="flex flex-col gap-4">
-                <div className="p-4 rounded-xl" style={{ background: '#1A1A1A', border: '1px solid #333' }}>
-                  <div className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#808080' }}>Profil Médical</div>
+                <div className="p-4 rounded-xl" style={{ background: 'var(--sos-bg-surface)', border: '1px solid var(--sos-border)' }}>
+                  <div className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--sos-text-muted)' }}>Profil Médical</div>
                   {/* Blood type */}
                   <div className="flex items-center gap-3 mb-3">
-                    <span className="text-sm" style={{ color: '#B0B0B0' }}>Groupe sanguin:</span>
+                    <span className="text-sm" style={{ color: 'var(--sos-text-secondary)' }}>Groupe sanguin:</span>
                     <span className="px-3 py-1 rounded-lg text-sm font-black text-white" style={{ background: getBloodTypeColor(currentEmergency.medicalProfile.bloodType) }}>
                       {currentEmergency.medicalProfile.bloodType}
                     </span>
@@ -139,9 +139,9 @@ export function LiveEmergencyPanel() {
                   {/* Chronic diseases */}
                   {currentEmergency.medicalProfile.chronicDiseases.length > 0 && (
                     <div className="mb-3">
-                      <div className="text-xs font-semibold mb-1" style={{ color: '#808080' }}>Maladies chroniques</div>
+                      <div className="text-xs font-semibold mb-1" style={{ color: 'var(--sos-text-muted)' }}>Maladies chroniques</div>
                       {currentEmergency.medicalProfile.chronicDiseases.map(d => (
-                        <div key={d} className="text-sm" style={{ color: '#B0B0B0' }}>• {d}</div>
+                        <div key={d} className="text-sm" style={{ color: 'var(--sos-text-secondary)' }}>• {d}</div>
                       ))}
                     </div>
                   )}
@@ -149,14 +149,14 @@ export function LiveEmergencyPanel() {
                   {currentEmergency.medicalProfile.emergencyNotes && (
                     <div className="mb-3 p-2 rounded-lg" style={{ background: 'rgba(255,152,0,0.1)', border: '1px solid rgba(255,152,0,0.3)' }}>
                       <div className="text-xs font-semibold mb-1" style={{ color: '#FF9800' }}>Notes d&apos;urgence</div>
-                      <div className="text-xs" style={{ color: '#B0B0B0' }}>{currentEmergency.medicalProfile.emergencyNotes}</div>
+                      <div className="text-xs" style={{ color: 'var(--sos-text-secondary)' }}>{currentEmergency.medicalProfile.emergencyNotes}</div>
                     </div>
                   )}
                   {/* ICE */}
                   <div>
-                    <div className="text-xs font-semibold mb-1" style={{ color: '#808080' }}>Contact d&apos;urgence (ICE)</div>
-                    <div className="text-sm font-medium text-white">{currentEmergency.medicalProfile.iceContact.name}</div>
-                    <div className="text-xs" style={{ color: '#808080' }}>{currentEmergency.medicalProfile.iceContact.relation} — {currentEmergency.medicalProfile.iceContact.phone}</div>
+                    <div className="text-xs font-semibold mb-1" style={{ color: 'var(--sos-text-muted)' }}>Contact d&apos;urgence (ICE)</div>
+                    <div className="text-sm font-medium" style={{ color: 'var(--sos-text-primary)' }}>{currentEmergency.medicalProfile.iceContact.name}</div>
+                    <div className="text-xs" style={{ color: 'var(--sos-text-secondary)' }}>{currentEmergency.medicalProfile.iceContact.relation} — {currentEmergency.medicalProfile.iceContact.phone}</div>
                   </div>
                 </div>
               </div>
@@ -171,7 +171,7 @@ export function LiveEmergencyPanel() {
             <a href="tel:15" className="flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all hover:opacity-90" style={{ background: 'rgba(229,57,53,0.2)', border: '1px solid #E53935', color: '#E53935' }}>
               <Phone className="w-5 h-5" /> Appeler SAMU — 15
             </a>
-            <a href={`tel:${currentEmergency.medicalProfile?.iceContact.phone ?? ''}`} className="flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all hover:opacity-90" style={{ background: '#1A1A1A', border: '1px solid #333', color: '#B0B0B0' }}>
+            <a href={`tel:${currentEmergency.medicalProfile?.iceContact.phone ?? ''}`} className="flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all hover:opacity-90" style={{ background: 'var(--sos-bg-hover)', border: '1px solid var(--sos-border)', color: 'var(--sos-text-secondary)' }}>
               <Phone className="w-5 h-5" /> Appeler Travailleur
             </a>
           </div>

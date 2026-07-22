@@ -21,14 +21,14 @@ function ToastContainer() {
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             className="flex items-start gap-3 px-4 py-3 rounded-xl shadow-2xl cursor-pointer min-w-64 max-w-80"
             style={{
-              background: t.type === 'success' ? 'rgba(76,175,80,0.15)' : t.type === 'error' ? 'rgba(229,57,53,0.15)' : '#1A1A1A',
+              background: t.type === 'success' ? 'rgba(76,175,80,0.15)' : t.type === 'error' ? 'rgba(229,57,53,0.15)' : 'var(--sos-bg-surface-2)',
               border: `1px solid ${t.type === 'success' ? '#4CAF50' : t.type === 'error' ? '#E53935' : '#333'}`,
             }}
             onClick={() => removeToast(t.id)}
           >
             <div>
               <div className="font-semibold text-sm text-white">{t.title}</div>
-              <div className="text-xs mt-0.5" style={{ color: '#B0B0B0' }}>{t.message}</div>
+              <div className="text-xs mt-0.5" style={{ color: 'var(--sos-text-secondary)' }}>{t.message}</div>
             </div>
           </motion.div>
         ))}
@@ -89,6 +89,9 @@ function SSEInitializer() {
           workerId: emergencyData.user_id || 'unknown',
           type: emergencyData.type,
           severity: emergencyData.severity.toLowerCase(),
+          gpsCoordinates: (emergencyData.latitude !== undefined && emergencyData.longitude !== undefined && emergencyData.latitude !== null && emergencyData.longitude !== null) 
+            ? { lat: emergencyData.latitude, lng: emergencyData.longitude } 
+            : undefined,
           location: emergencyData.location_description || 'Unknown location',
           status: emergencyData.status,
           startedAt: emergencyData.started_at,
@@ -156,11 +159,11 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       <SSEInitializer />
       <FlashOverlay />
       <EmergencyModal />
-      <div className="flex h-screen overflow-hidden" style={{ background: '#0A0A0A' }}>
+      <div className="flex h-screen overflow-hidden" style={{ background: 'var(--sos-bg-base)' }}>
         <Sidebar />
         <div className="flex flex-col flex-1 overflow-hidden">
           <Navbar />
-          <main className="flex-1 overflow-y-auto p-6" style={{ background: '#0A0A0A' }}>
+          <main className="flex-1 overflow-y-auto p-6" style={{ background: 'var(--sos-bg-base)' }}>
             {children}
           </main>
         </div>

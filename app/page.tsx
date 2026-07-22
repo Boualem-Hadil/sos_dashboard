@@ -14,15 +14,15 @@ export default function DashboardPage() {
   }
 
   if (isLoading || !company) {
-    return <DashboardLayout><div className="text-white p-8">Chargement...</div></DashboardLayout>;
+    return <DashboardLayout><div className="p-8" style={{ color: 'var(--sos-text-primary)' }}>Chargement...</div></DashboardLayout>;
   }
 
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-6">
         <div>
-          <h1 className="text-2xl font-black text-white">Tableau de bord</h1>
-          <p className="text-sm mt-1" style={{ color: '#808080' }}>Surveillance en temps réel — {company.name}</p>
+          <h1 className="text-2xl font-black" style={{ color: 'var(--sos-text-primary)' }}>Tableau de bord</h1>
+          <p className="text-sm mt-1" style={{ color: 'var(--sos-text-secondary)' }}>Surveillance en temps réel — {company.name}</p>
         </div>
         <StatsCards />
         <LiveEmergencyPanel />

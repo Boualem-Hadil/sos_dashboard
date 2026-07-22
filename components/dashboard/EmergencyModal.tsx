@@ -3,12 +3,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useEmergency } from '@/context/EmergencyContext';
 import { resolveEmergencyApi } from '@/lib/api';
 import { getToken } from '@/lib/auth';
-import { PhoneCall, MapPin, AlertTriangle, HeartPulse, Volume2, VolumeX, CheckCircle, ShieldAlert, Phone } from 'lucide-react';
+import { PhoneCall, MapPin, AlertTriangle, HeartPulse, Volume2, VolumeX, CheckCircle, ShieldAlert, Phone, Map as MapIcon, ChevronDown, ChevronUp } from 'lucide-react';
+import dynamic from 'next/dynamic';
+
+const SOSMap = dynamic(() => import('@/components/dashboard/Map'), { ssr: false, loading: () => <div className="w-full h-full bg-slate-100 animate-pulse rounded-xl flex items-center justify-center">Chargement carte...</div> });
 
 export function EmergencyModal() {
   const { status, currentEmergency, resolveEmergency, addToast } = useEmergency();
   const [isMuted, setIsMuted] = useState(false);
   const [isResolving, setIsResolving] = useState(false);
+  const [isMapExpanded, setIsMapExpanded] = useState(false);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -79,7 +83,17 @@ export function EmergencyModal() {
     }
   };
 
-  const { type, severity, workerName, location, medicalProfile } = currentEmergency;
+  const { type, severity, workerName, location, medicalProfile, gpsCoordinates } = currentEmergency;
+  const apiLat = (currentEmergency as any).latitude;
+  const apiLng = (currentEmergency as any).longitude;
+  
+  const hasCoordinates = !!gpsCoordinates || (apiLat !== undefined && apiLng !== undefined && apiLat !== null && apiLng !== null);
+  
+  const mapCenter: [number, number] = gpsCoordinates 
+    ? [gpsCoordinates.lat, gpsCoordinates.lng] 
+    : hasCoordinates
+      ? [apiLat, apiLng]
+      : [0, 0];
 
   return (
     <AnimatePresence>
@@ -100,7 +114,8 @@ export function EmergencyModal() {
           initial={{ scale: 0.9, y: 20 }}
           animate={{ scale: 1, y: 0 }}
           exit={{ scale: 0.9, y: 20 }}
-          className="relative w-full max-w-3xl bg-neutral-900 border-2 border-red-500 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+          className="relative w-full max-w-3xl border-2 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+          style={{ background: 'var(--sos-bg-surface)', borderColor: '#E53935' }}
         >
           {/* Header */}
           <div className="bg-red-600 px-6 py-4 flex items-center justify-between">
@@ -120,111 +135,143 @@ export function EmergencyModal() {
           <div className="p-6 md:p-8 flex flex-col gap-8">
             {/* Top Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-neutral-800 p-4 rounded-xl border border-neutral-700 flex flex-col">
-                <span className="text-neutral-400 text-sm font-semibold uppercase mb-1">Employé</span>
-                <span className="text-white text-xl font-bold">{workerName}</span>
+              <div className="p-4 rounded-xl border flex flex-col" style={{ background: 'var(--sos-bg-surface-2)', borderColor: 'var(--sos-border)' }}>
+                <span className="text-sm font-semibold uppercase mb-1" style={{ color: 'var(--sos-text-secondary)' }}>Employé</span>
+                <span className="text-xl font-bold" style={{ color: 'var(--sos-text-primary)' }}>{workerName}</span>
               </div>
-              <div className="bg-neutral-800 p-4 rounded-xl border border-neutral-700 flex flex-col">
-                <span className="text-neutral-400 text-sm font-semibold uppercase mb-1">Localisation</span>
-                <div className="flex items-center gap-2 text-white">
-                  <MapPin className="w-5 h-5 text-red-400" />
-                  <span className="text-xl font-bold">{location}</span>
+              <div className="p-4 rounded-xl border flex flex-col justify-between" style={{ background: 'var(--sos-bg-surface-2)', borderColor: 'var(--sos-border)' }}>
+                <div>
+                  <span className="text-sm font-semibold uppercase mb-1" style={{ color: 'var(--sos-text-secondary)' }}>Localisation</span>
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-5 h-5 text-red-500" />
+                    <span className="text-xl font-bold" style={{ color: 'var(--sos-text-primary)' }}>{location}</span>
+                  </div>
                 </div>
+                {hasCoordinates ? (
+                  <button 
+                    onClick={() => setIsMapExpanded(!isMapExpanded)}
+                    className="mt-3 flex items-center gap-2 text-sm font-semibold px-3 py-1.5 rounded-lg transition-colors bg-blue-50 hover:bg-blue-100 text-blue-700 w-fit"
+                  >
+                    <MapIcon className="w-4 h-4" /> 
+                    {isMapExpanded ? 'Masquer la carte' : 'Afficher sur la carte'}
+                    {isMapExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </button>
+                ) : (
+                  <div className="mt-3 text-sm font-semibold italic flex items-center gap-2" style={{ color: 'var(--sos-text-muted)' }}>
+                    <MapPin className="w-4 h-4" /> Position GPS non disponible
+                  </div>
+                )}
               </div>
             </div>
+
+            {/* Expandable Map Section */}
+            <AnimatePresence>
+              {isMapExpanded && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="h-[300px] w-full rounded-xl border mt-2 shadow-inner" style={{ borderColor: 'var(--sos-border)' }}>
+                    <SOSMap center={mapCenter} zoom={15} label={`Urgence: ${workerName}`} />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Emergency Details */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-2">
               {/* Left Column: Situation */}
-              <div className="flex-1 bg-red-950/30 p-6 rounded-xl border border-red-900/50">
+              <div className="flex-1 p-6 rounded-xl border" style={{ background: 'rgba(229,57,53,0.06)', borderColor: 'rgba(229,57,53,0.2)' }}>
                 <div className="flex items-center gap-2 mb-4">
                   <AlertTriangle className="w-6 h-6 text-red-500" />
-                  <h3 className="text-red-400 font-bold text-lg">Situation</h3>
+                  <h3 className="text-red-500 font-bold text-lg">Situation</h3>
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <div className="text-neutral-400 text-sm">Type</div>
-                    <div className="text-white font-semibold text-lg capitalize">{type}</div>
+                    <div className="text-sm" style={{ color: 'var(--sos-text-secondary)' }}>Type</div>
+                    <div className="font-semibold text-lg capitalize" style={{ color: 'var(--sos-text-primary)' }}>{type}</div>
                   </div>
                   <div>
-                    <div className="text-neutral-400 text-sm">Sévérité</div>
-                    <div className="text-white font-semibold text-lg capitalize">
-                      {severity === 'critical' ? '🔴 Critique' : severity === 'high' ? '🟠 Élevée' : severity === 'moderate' ? '🟡 Modérée' : '🔵 Faible'}
+                    <div className="text-sm" style={{ color: 'var(--sos-text-secondary)' }}>Sévérité</div>
+                    <div className="font-semibold text-lg capitalize" style={{ color: 'var(--sos-text-primary)' }}>
+                      {severity === 'critical' ? '🔴 Critique' : severity === 'moderate' ? '🟡 Modérée' : '🟢 Mineure'}
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Middle Column: Medical Profile */}
-              <div className="flex-1 bg-neutral-800 p-6 rounded-xl border border-neutral-700">
+              <div className="flex-1 p-6 rounded-xl border" style={{ background: 'var(--sos-bg-surface-2)', borderColor: 'var(--sos-border)' }}>
                 <div className="flex items-center gap-2 mb-4">
                   <HeartPulse className="w-6 h-6 text-pink-500" />
-                  <h3 className="text-pink-400 font-bold text-lg">Profil Médical</h3>
+                  <h3 className="text-pink-500 font-bold text-lg">Profil Médical</h3>
                 </div>
                 {medicalProfile ? (
                   <div className="space-y-3">
-                    <div className="flex justify-between items-center bg-neutral-900 p-2 rounded">
-                      <span className="text-neutral-400 text-sm">Groupe Sanguin</span>
-                      <span className="text-white font-bold text-red-400">{medicalProfile.bloodType}</span>
+                    <div className="flex justify-between items-center p-2 rounded" style={{ background: 'var(--sos-bg-surface)' }}>
+                      <span className="text-sm" style={{ color: 'var(--sos-text-secondary)' }}>Groupe Sanguin</span>
+                      <span className="font-bold text-red-500">{medicalProfile.bloodType}</span>
                     </div>
                     <div>
-                      <span className="text-neutral-400 text-sm block mb-1">Allergies</span>
+                      <span className="text-sm block mb-1" style={{ color: 'var(--sos-text-secondary)' }}>Allergies</span>
                       {medicalProfile.allergies && medicalProfile.allergies.length > 0 ? (
                         <div className="flex flex-wrap gap-2">
                           {medicalProfile.allergies.map((a: string, i: number) => (
-                            <span key={i} className="px-2 py-1 bg-red-900/40 text-red-300 text-xs rounded-md">{a}</span>
+                            <span key={i} className="px-2 py-1 text-xs rounded-md font-semibold" style={{ background: 'rgba(229,57,53,0.12)', color: '#EF5350' }}>{a}</span>
                           ))}
                         </div>
-                      ) : <span className="text-neutral-500 text-sm">Aucune connue</span>}
+                      ) : <span className="text-sm" style={{ color: 'var(--sos-text-muted)' }}>Aucune connue</span>}
                     </div>
                     <div>
-                      <span className="text-neutral-400 text-sm block mb-1">Maladies Chroniques</span>
+                      <span className="text-sm block mb-1" style={{ color: 'var(--sos-text-secondary)' }}>Maladies Chroniques</span>
                       {medicalProfile.chronicDiseases && medicalProfile.chronicDiseases.length > 0 ? (
                         <div className="flex flex-wrap gap-2">
                           {medicalProfile.chronicDiseases.map((a: string, i: number) => (
-                            <span key={i} className="px-2 py-1 bg-orange-900/40 text-orange-300 text-xs rounded-md">{a}</span>
+                            <span key={i} className="px-2 py-1 text-xs rounded-md font-semibold" style={{ background: 'rgba(245,158,11,0.12)', color: '#D97706' }}>{a}</span>
                           ))}
                         </div>
-                      ) : <span className="text-neutral-500 text-sm">Aucune signalée</span>}
+                      ) : <span className="text-sm" style={{ color: 'var(--sos-text-muted)' }}>Aucune signalée</span>}
                     </div>
                   </div>
                 ) : (
-                  <div className="text-neutral-500 text-sm italic">Profil médical non disponible</div>
+                  <div className="text-sm italic" style={{ color: 'var(--sos-text-muted)' }}>Profil médical non disponible</div>
                 )}
               </div>
 
               {/* Right Column: ICE Contact */}
-              <div className="flex-1 bg-neutral-800 p-6 rounded-xl border border-neutral-700">
+              <div className="flex-1 p-6 rounded-xl border" style={{ background: 'var(--sos-bg-surface-2)', borderColor: 'var(--sos-border)' }}>
                 <div className="flex items-center gap-2 mb-4">
                   <Phone className="w-6 h-6 text-blue-400" />
-                  <h3 className="text-blue-400 font-bold text-lg">Contact ICE</h3>
+                  <h3 className="text-blue-500 font-bold text-lg">Contact ICE</h3>
                 </div>
                 {medicalProfile?.iceContact && medicalProfile.iceContact.name ? (
                   <div className="space-y-4">
                     <div>
-                      <div className="text-neutral-400 text-sm">Nom</div>
-                      <div className="text-white font-semibold text-lg">{medicalProfile.iceContact.name}</div>
+                      <div className="text-sm" style={{ color: 'var(--sos-text-secondary)' }}>Nom</div>
+                      <div className="font-semibold text-lg" style={{ color: 'var(--sos-text-primary)' }}>{medicalProfile.iceContact.name}</div>
                     </div>
                     <div>
-                      <div className="text-neutral-400 text-sm">Relation</div>
-                      <div className="text-white font-semibold text-lg capitalize">{medicalProfile.iceContact.relation || 'Non précisé'}</div>
+                      <div className="text-sm" style={{ color: 'var(--sos-text-secondary)' }}>Relation</div>
+                      <div className="font-semibold text-lg capitalize" style={{ color: 'var(--sos-text-primary)' }}>{medicalProfile.iceContact.relation || 'Non précisé'}</div>
                     </div>
                     {medicalProfile.iceContact.phone && (
-                      <div className="mt-4 pt-4 border-t border-neutral-700">
-                        <a href={`tel:${medicalProfile.iceContact.phone}`} className="flex items-center justify-center gap-2 bg-neutral-700 hover:bg-neutral-600 text-white px-4 py-2 rounded-lg font-bold transition-colors w-full">
+                      <div className="mt-4 pt-4 border-t" style={{ borderColor: 'var(--sos-border)' }}>
+                        <a href={`tel:${medicalProfile.iceContact.phone}`} className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-bold transition-all w-full" style={{ background: 'var(--sos-bg-hover)', border: '1px solid var(--sos-border)', color: 'var(--sos-text-primary)' }}>
                           <PhoneCall className="w-4 h-4" /> {medicalProfile.iceContact.phone}
                         </a>
                       </div>
                     )}
                   </div>
                 ) : (
-                  <div className="text-neutral-500 text-sm italic">Aucun contact d'urgence renseigné</div>
+                  <div className="text-sm italic" style={{ color: 'var(--sos-text-muted)' }}>Aucun contact d'urgence renseigné</div>
                 )}
               </div>
             </div>
 
             {/* Action Bar */}
-            <div className="flex flex-col md:flex-row gap-6 items-center justify-between border-t border-neutral-800 pt-6">
+            <div className="flex flex-col md:flex-row gap-6 items-center justify-between border-t pt-6" style={{ borderColor: 'var(--sos-border)' }}>
               <div className="flex flex-wrap gap-3 w-full md:w-auto justify-center md:justify-start">
                 <a href="tel:14" className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 rounded-lg font-bold transition-colors text-sm shadow-lg shadow-orange-900/20">
                   <PhoneCall className="w-4 h-4" /> Pompiers (14)
@@ -243,7 +290,7 @@ export function EmergencyModal() {
               <button
                 onClick={handleResolve}
                 disabled={isResolving}
-                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 disabled:bg-neutral-700 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl font-bold transition-colors w-full md:w-auto justify-center"
+                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl font-bold transition-colors w-full md:w-auto justify-center"
               >
                 {isResolving ? (
                   <span className="animate-pulse">Résolution...</span>

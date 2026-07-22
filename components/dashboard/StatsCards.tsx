@@ -4,7 +4,7 @@ import { useEmergency } from '@/context/EmergencyContext';
 
 export function StatsCards() {
   const { workers, liveCount, emergencyHistory, company, isLoading } = useEmergency();
-  
+
   if (isLoading || !company) return null;
 
   const activeWorkers = workers.filter(w => w.status === 'active').length;
@@ -15,32 +15,71 @@ export function StatsCards() {
   }).length;
 
   const cards = [
-    { label: 'Total Travailleurs', value: `${company.currentWorkers}/${company.maxWorkers}`, icon: Users, color: '#4CAF50', bg: 'rgba(76,175,80,0.1)', border: 'rgba(76,175,80,0.3)', sub: `${company.maxWorkers - company.currentWorkers} postes disponibles` },
-    { label: 'Actifs Maintenant', value: activeWorkers, icon: Zap, color: '#2196F3', bg: 'rgba(33,150,243,0.1)', border: 'rgba(33,150,243,0.3)', sub: 'En service actuellement' },
-    { label: 'Urgences en direct', value: liveCount, icon: AlertTriangle, color: '#E53935', bg: liveCount > 0 ? 'rgba(229,57,53,0.15)' : 'rgba(229,57,53,0.05)', border: liveCount > 0 ? '#E53935' : 'rgba(229,57,53,0.2)', sub: liveCount > 0 ? '⚠ Intervention requise' : 'Aucune urgence active', pulse: liveCount > 0 },
-    { label: 'Incidents ce mois', value: thisMonth, icon: Calendar, color: '#808080', bg: 'rgba(128,128,128,0.1)', border: 'rgba(128,128,128,0.2)', sub: 'Mois en cours' },
+    {
+      label: 'Total Travailleurs',
+      value: `${company.currentWorkers}/${company.maxWorkers}`,
+      icon: Users,
+      color: 'var(--sos-success)',
+      muted: 'var(--sos-success-muted)',
+      border: 'rgba(16,185,129,0.20)',
+      sub: `${company.maxWorkers - company.currentWorkers} postes disponibles`,
+    },
+    {
+      label: 'Actifs maintenant',
+      value: activeWorkers,
+      icon: Zap,
+      color: 'var(--sos-info)',
+      muted: 'var(--sos-info-muted)',
+      border: 'rgba(59,130,246,0.20)',
+      sub: 'En service actuellement',
+    },
+    {
+      label: 'Urgences en direct',
+      value: liveCount,
+      icon: AlertTriangle,
+      color: 'var(--sos-accent)',
+      muted: liveCount > 0 ? 'var(--sos-accent-muted)' : 'transparent',
+      border: liveCount > 0 ? 'var(--sos-accent-border)' : 'var(--sos-border)',
+      sub: liveCount > 0 ? '⚠ Intervention requise' : 'Aucune urgence active',
+      pulse: liveCount > 0,
+    },
+    {
+      label: 'Incidents ce mois',
+      value: thisMonth,
+      icon: Calendar,
+      color: 'var(--sos-text-secondary)',
+      muted: 'var(--sos-bg-hover)',
+      border: 'var(--sos-border)',
+      sub: 'Mois en cours',
+    },
   ];
 
   return (
-    <div className="grid grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       {cards.map((c, i) => (
         <div
           key={i}
-          className="rounded-xl p-5 flex flex-col gap-3"
+          className="rounded-xl p-5 flex flex-col gap-3 transition-shadow"
           style={{
-            background: c.bg,
+            background: 'var(--sos-bg-surface)',
             border: `1px solid ${c.border}`,
+            boxShadow: 'var(--sos-shadow)',
             animation: c.pulse ? 'emergency-pulse 1.5s ease-in-out infinite' : undefined,
           }}
         >
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium" style={{ color: '#B0B0B0' }}>{c.label}</span>
-            <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: c.bg, border: `1px solid ${c.border}` }}>
-              <c.icon className="w-5 h-5" style={{ color: c.color }} />
+            <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--sos-text-muted)' }}>
+              {c.label}
+            </span>
+            <div
+              className="w-8 h-8 rounded-lg flex items-center justify-center"
+              style={{ background: c.muted }}
+            >
+              <c.icon className="w-4 h-4" style={{ color: c.color }} />
             </div>
           </div>
           <div className="text-3xl font-black" style={{ color: c.color }}>{c.value}</div>
-          <div className="text-xs" style={{ color: '#555' }}>{c.sub}</div>
+          <div className="text-xs" style={{ color: 'var(--sos-text-muted)' }}>{c.sub}</div>
         </div>
       ))}
     </div>

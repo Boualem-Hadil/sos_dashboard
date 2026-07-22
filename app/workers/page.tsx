@@ -22,23 +22,23 @@ function WorkerSidePanel({ worker, onClose }: { worker: Worker; onClose: () => v
       exit={{ x: '100%', opacity: 0 }}
       transition={{ type: 'spring', damping: 25, stiffness: 200 }}
       className="fixed right-0 top-0 h-screen w-96 overflow-y-auto z-40 shadow-2xl"
-      style={{ background: '#111111', borderLeft: '1px solid #222' }}
+      style={{ background: 'var(--sos-bg-surface)', borderLeft: '1px solid var(--sos-border)' }}
     >
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-bold text-white">Profil Travailleur</h2>
-          <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: '#1A1A1A' }}>
-            <X className="w-4 h-4" style={{ color: '#808080' }} />
+          <h2 className="text-lg font-bold" style={{ color: 'var(--sos-text-primary)' }}>Profil Travailleur</h2>
+          <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--sos-bg-hover)]" style={{ background: 'var(--sos-bg-surface-2)', border: '1px solid var(--sos-border)' }}>
+            <X className="w-4 h-4" style={{ color: 'var(--sos-text-secondary)' }} />
           </button>
         </div>
 
         {/* Avatar + name */}
-        <div className="flex flex-col items-center text-center mb-6 p-5 rounded-xl" style={{ background: '#1A1A1A' }}>
+        <div className="flex flex-col items-center text-center mb-6 p-5 rounded-xl border" style={{ background: 'var(--sos-bg-surface-2)', borderColor: 'var(--sos-border)' }}>
           <div className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-black text-white mb-3" style={{ background: '#E53935' }}>
             {getInitials(worker.firstName, worker.lastName)}
           </div>
-          <div className="text-xl font-bold text-white">{worker.firstName} {worker.lastName}</div>
-          <div className="text-sm font-mono mt-1" style={{ color: '#808080' }}>{worker.employeeId}</div>
+          <div className="text-xl font-bold" style={{ color: 'var(--sos-text-primary)' }}>{worker.firstName} {worker.lastName}</div>
+          <div className="text-sm font-mono mt-1" style={{ color: 'var(--sos-text-secondary)' }}>{worker.employeeId}</div>
           <div className="mt-2">
             <span className="px-3 py-1 rounded-full text-xs font-bold" style={{ background: st.bg, color: st.color, border: `1px solid ${st.color}40` }}>
               {getWorkerStatusLabel(worker.status)}
@@ -56,18 +56,18 @@ function WorkerSidePanel({ worker, onClose }: { worker: Worker; onClose: () => v
             { label: 'Dernière activité', value: formatDateTime(worker.lastSeen) },
             { label: 'Date d\'embauche', value: new Date(worker.joinDate).toLocaleDateString('fr-DZ') },
           ].map(({ label, value }) => (
-            <div key={label} className="flex justify-between items-start py-2" style={{ borderBottom: '1px solid #1E1E1E' }}>
-              <span className="text-xs" style={{ color: '#808080' }}>{label}</span>
-              <span className="text-sm text-white text-right max-w-48">{value}</span>
+            <div key={label} className="flex justify-between items-start py-2" style={{ borderBottom: '1px solid var(--sos-border-subtle)' }}>
+              <span className="text-xs" style={{ color: 'var(--sos-text-muted)' }}>{label}</span>
+              <span className="text-sm text-right max-w-48 font-medium" style={{ color: 'var(--sos-text-primary)' }}>{value}</span>
             </div>
           ))}
         </div>
 
         {/* Medical */}
-        <div className="p-4 rounded-xl" style={{ background: '#1A1A1A', border: '1px solid #222' }}>
-          <div className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: '#808080' }}>Profil Médical</div>
+        <div className="p-4 rounded-xl border" style={{ background: 'var(--sos-bg-surface-2)', borderColor: 'var(--sos-border)' }}>
+          <div className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--sos-text-muted)' }}>Profil Médical</div>
           <div className="flex items-center gap-2 mb-3">
-            <span className="text-xs" style={{ color: '#B0B0B0' }}>Groupe sanguin:</span>
+            <span className="text-xs" style={{ color: 'var(--sos-text-secondary)' }}>Groupe sanguin:</span>
             <span className="px-2 py-0.5 rounded text-xs font-black text-white" style={{ background: getBloodTypeColor(worker.medicalProfile.bloodType) }}>
               {worker.medicalProfile.bloodType}
             </span>
@@ -77,29 +77,29 @@ function WorkerSidePanel({ worker, onClose }: { worker: Worker; onClose: () => v
               <div className="text-xs font-semibold mb-1" style={{ color: '#E53935' }}>⚠ ALLERGIES</div>
               <div className="flex flex-wrap gap-1">
                 {worker.medicalProfile.allergies.map(a => (
-                  <span key={a} className="px-2 py-0.5 rounded text-xs" style={{ background: 'rgba(229,57,53,0.15)', color: '#EF5350' }}>{a}</span>
+                  <span key={a} className="px-2 py-0.5 rounded text-xs font-semibold" style={{ background: 'rgba(229,57,53,0.12)', color: '#EF5350' }}>{a}</span>
                 ))}
               </div>
             </div>
           )}
           {worker.medicalProfile.chronicDiseases.length > 0 && (
             <div className="mb-3">
-              <div className="text-xs font-semibold mb-1" style={{ color: '#808080' }}>Maladies chroniques</div>
+              <div className="text-xs font-semibold mb-1" style={{ color: 'var(--sos-text-muted)' }}>Maladies chroniques</div>
               {worker.medicalProfile.chronicDiseases.map(d => (
-                <div key={d} className="text-xs" style={{ color: '#B0B0B0' }}>• {d}</div>
+                <div key={d} className="text-xs" style={{ color: 'var(--sos-text-secondary)' }}>• {d}</div>
               ))}
             </div>
           )}
           {worker.medicalProfile.emergencyNotes && (
             <div className="mb-3 p-2 rounded" style={{ background: 'rgba(255,152,0,0.1)', border: '1px solid rgba(255,152,0,0.2)' }}>
               <div className="text-xs font-semibold" style={{ color: '#FF9800' }}>Notes</div>
-              <div className="text-xs mt-1" style={{ color: '#B0B0B0' }}>{worker.medicalProfile.emergencyNotes}</div>
+              <div className="text-xs mt-1" style={{ color: 'var(--sos-text-secondary)' }}>{worker.medicalProfile.emergencyNotes}</div>
             </div>
           )}
           <div>
-            <div className="text-xs font-semibold mb-1" style={{ color: '#808080' }}>Contact ICE</div>
-            <div className="text-sm text-white">{worker.medicalProfile.iceContact.name}</div>
-            <div className="text-xs" style={{ color: '#808080' }}>{worker.medicalProfile.iceContact.relation}</div>
+            <div className="text-xs font-semibold mb-1" style={{ color: 'var(--sos-text-muted)' }}>Contact ICE</div>
+            <div className="text-sm font-medium" style={{ color: 'var(--sos-text-primary)' }}>{worker.medicalProfile.iceContact.name}</div>
+            <div className="text-xs" style={{ color: 'var(--sos-text-secondary)' }}>{worker.medicalProfile.iceContact.relation}</div>
             <a href={`tel:${worker.medicalProfile.iceContact.phone}`} className="flex items-center gap-1 mt-1 text-xs" style={{ color: '#2196F3' }}>
               <Phone className="w-3 h-3" /> {worker.medicalProfile.iceContact.phone}
             </a>
@@ -121,7 +121,7 @@ export default function WorkersPage() {
   }
 
   if (isLoading || !company) {
-    return <DashboardLayout><div className="text-white p-8">Chargement...</div></DashboardLayout>;
+    return <DashboardLayout><div className="p-8" style={{ color: 'var(--sos-text-primary)' }}>Chargement...</div></DashboardLayout>;
   }
 
   const units = [...new Set(workers.map(w => w.unit))];
@@ -138,16 +138,20 @@ export default function WorkersPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-black text-white">Travailleurs</h1>
-            <p className="text-sm mt-1" style={{ color: '#808080' }}>
+            <h1 className="text-2xl font-black" style={{ color: 'var(--sos-text-primary)' }}>Travailleurs</h1>
+            <p className="text-sm mt-1" style={{ color: 'var(--sos-text-secondary)' }}>
               <span className="font-bold" style={{ color: '#4CAF50' }}>{company.currentWorkers}</span>
-              <span style={{ color: '#555' }}>/{company.maxWorkers}</span> travailleurs enregistrés
+              <span style={{ color: 'var(--sos-text-muted)' }}>/{company.maxWorkers}</span> travailleurs enregistrés
             </p>
           </div>
           <button
             id="btn-add-worker"
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-white transition-all hover:opacity-90"
-            style={{ background: company.currentWorkers >= company.maxWorkers ? '#333' : '#E53935', cursor: company.currentWorkers >= company.maxWorkers ? 'not-allowed' : 'pointer' }}
+            style={{ 
+              background: company.currentWorkers >= company.maxWorkers ? 'var(--sos-border)' : 'var(--sos-accent)', 
+              color: company.currentWorkers >= company.maxWorkers ? 'var(--sos-text-muted)' : '#fff',
+              cursor: company.currentWorkers >= company.maxWorkers ? 'not-allowed' : 'pointer' 
+            }}
             disabled={company.currentWorkers >= company.maxWorkers}
             title={company.currentWorkers >= company.maxWorkers ? 'Limite atteinte. Contactez le support pour upgrade.' : ''}
           >
@@ -158,21 +162,21 @@ export default function WorkersPage() {
         {/* Filters */}
         <div className="flex gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#555' }} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--sos-text-muted)' }} />
             <input
               type="text"
               placeholder="Rechercher par nom ou ID..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl text-white text-sm outline-none"
-              style={{ background: '#111111', border: '1px solid #222', color: '#fff' }}
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm outline-none transition-all"
+              style={{ background: 'var(--sos-bg-surface)', border: '1px solid var(--sos-border)', color: 'var(--sos-text-primary)' }}
             />
           </div>
           <select
             value={unitFilter}
             onChange={e => setUnitFilter(e.target.value)}
-            className="px-4 py-2.5 rounded-xl text-sm outline-none"
-            style={{ background: '#111111', border: '1px solid #222', color: unitFilter ? '#fff' : '#808080' }}
+            className="px-4 py-2.5 rounded-xl text-sm outline-none transition-all"
+            style={{ background: 'var(--sos-bg-surface)', border: '1px solid var(--sos-border)', color: unitFilter ? 'var(--sos-text-primary)' : 'var(--sos-text-secondary)' }}
           >
             <option value="">Toutes les unités</option>
             {units.map(u => <option key={u} value={u}>{u}</option>)}
@@ -180,12 +184,12 @@ export default function WorkersPage() {
         </div>
 
         {/* Table */}
-        <div className="rounded-xl overflow-hidden" style={{ background: '#111111', border: '1px solid #222' }}>
+        <div className="rounded-xl overflow-hidden" style={{ background: 'var(--sos-bg-surface)', border: '1px solid var(--sos-border)', boxShadow: 'var(--sos-shadow)' }}>
           <table className="w-full text-sm">
             <thead>
-              <tr style={{ borderBottom: '1px solid #1A1A1A' }}>
+              <tr style={{ borderBottom: '1px solid var(--sos-border)' }}>
                 {['', 'Nom', 'ID Employé', 'Unité', 'Statut', 'Groupe Sanguin', 'Dernière activité', 'Actions'].map(h => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide" style={{ color: '#555' }}>{h}</th>
+                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--sos-text-muted)' }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -193,18 +197,18 @@ export default function WorkersPage() {
               {filtered.map((w, i) => {
                 const st = STATUS_STYLES[w.status] || STATUS_STYLES.offline;
                 return (
-                  <tr key={w.id} style={{ borderBottom: i < filtered.length - 1 ? '1px solid #1A1A1A' : undefined, cursor: 'pointer' }}
+                  <tr key={w.id} style={{ borderBottom: i < filtered.length - 1 ? '1px solid var(--sos-border-subtle)' : undefined, cursor: 'pointer' }}
                     onClick={() => setSelected(w)}
-                    className="hover:bg-white/5 transition-colors"
+                    className="hover:bg-[var(--sos-bg-hover)] transition-colors"
                   >
                     <td className="px-4 py-3">
                       <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white" style={{ background: '#E53935' }}>
                         {getInitials(w.firstName, w.lastName)}
                       </div>
                     </td>
-                    <td className="px-4 py-3 font-medium text-white">{w.firstName} {w.lastName}</td>
-                    <td className="px-4 py-3 font-mono text-xs" style={{ color: '#808080' }}>{w.employeeId}</td>
-                    <td className="px-4 py-3 text-xs" style={{ color: '#B0B0B0' }}>{w.unit}</td>
+                    <td className="px-4 py-3 font-medium" style={{ color: 'var(--sos-text-primary)' }}>{w.firstName} {w.lastName}</td>
+                    <td className="px-4 py-3 font-mono text-xs" style={{ color: 'var(--sos-text-muted)' }}>{w.employeeId}</td>
+                    <td className="px-4 py-3 text-xs" style={{ color: 'var(--sos-text-secondary)' }}>{w.unit}</td>
                     <td className="px-4 py-3">
                       <span className="px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 w-fit"
                         style={{ background: st.bg, color: st.color, border: `1px solid ${st.color}40`, animation: st.pulse ? 'badge-pulse 1.2s infinite' : undefined }}>
@@ -215,9 +219,9 @@ export default function WorkersPage() {
                     <td className="px-4 py-3">
                       <span className="px-2 py-0.5 rounded text-xs font-black text-white" style={{ background: getBloodTypeColor(w.bloodType) }}>{w.bloodType}</span>
                     </td>
-                    <td className="px-4 py-3 text-xs" style={{ color: '#808080' }}>{formatDateTime(w.lastSeen)}</td>
+                    <td className="px-4 py-3 text-xs" style={{ color: 'var(--sos-text-muted)' }}>{formatDateTime(w.lastSeen)}</td>
                     <td className="px-4 py-3">
-                      <button onClick={e => { e.stopPropagation(); setSelected(w); }} className="text-xs px-3 py-1.5 rounded-lg" style={{ background: '#1A1A1A', color: '#B0B0B0', border: '1px solid #333' }}>
+                      <button onClick={e => { e.stopPropagation(); setSelected(w); }} className="text-xs px-3 py-1.5 rounded-lg transition-colors" style={{ background: 'var(--sos-bg-hover)', color: 'var(--sos-text-secondary)', border: '1px solid var(--sos-border)' }}>
                         Voir profil
                       </button>
                     </td>
