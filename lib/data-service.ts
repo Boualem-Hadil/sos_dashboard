@@ -74,6 +74,7 @@ export async function getEmergencies(filters?: {
     type?: string;
     status?: string;
     page?: number;
+    user_id?: string;
 }) {
     if (USE_MOCK) {
         await delay(300);
@@ -84,6 +85,9 @@ export async function getEmergencies(filters?: {
         }
         if (filters?.status) {
             result = result.filter(e => e.status === filters.status);
+        }
+        if (filters?.user_id) {
+            result = result.filter(e => (e as any).user_id === filters.user_id || (e as any).workerId === filters.user_id);
         }
         return result;
     }

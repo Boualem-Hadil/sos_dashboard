@@ -13,6 +13,11 @@ export function EmergencyModal() {
   const [isMuted, setIsMuted] = useState(false);
   const [isResolving, setIsResolving] = useState(false);
   const [isMapExpanded, setIsMapExpanded] = useState(false);
+  
+  // Resolution fields
+  const [responderType, setResponderType] = useState<'police' | 'samu' | 'fire' | 'other' | undefined>();
+  const [etaMinutes, setEtaMinutes] = useState<number | ''>('');
+  const [resolutionNotes, setResolutionNotes] = useState('');
   const audioCtxRef = useRef<AudioContext | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -64,7 +69,14 @@ export function EmergencyModal() {
     try {
       const token = getToken();
       if (!token) throw new Error("No token");
-      await resolveEmergencyApi(currentEmergency.id, 'resolved', token);
+      await resolveEmergencyApi(
+        currentEmergency.id, 
+        'resolved', 
+        token, 
+        responderType, 
+        etaMinutes === '' ? undefined : Number(etaMinutes), 
+        resolutionNotes || undefined
+      );
       resolveEmergency();
       addToast({
         type: 'success',
@@ -196,7 +208,7 @@ export function EmergencyModal() {
                   <div>
                     <div className="text-sm" style={{ color: 'var(--sos-text-secondary)' }}>Sévérité</div>
                     <div className="font-semibold text-lg capitalize" style={{ color: 'var(--sos-text-primary)' }}>
-                      {severity === 'critical' ? '🔴 Critique' : severity === 'moderate' ? '🟡 Modérée' : '🟢 Mineure'}
+                      {severity?.toLowerCase() === 'critical' ? '🔴 Critique' : severity?.toLowerCase() === 'moderate' ? '🟡 Modérée' : '🟢 Mineure'}
                     </div>
                   </div>
                 </div>
@@ -267,6 +279,51 @@ export function EmergencyModal() {
                 ) : (
                   <div className="text-sm italic" style={{ color: 'var(--sos-text-muted)' }}>Aucun contact d'urgence renseigné</div>
                 )}
+              </div>
+            </div>
+
+            {/* Resolution Form */}
+            <div className="border-t pt-6" style={{ borderColor: 'var(--sos-border)' }}>
+              <h3 className="font-bold text-lg mb-4" style={{ color: 'var(--sos-text-primary)' }}>Détails de l'intervention</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm mb-1" style={{ color: 'var(--sos-text-secondary)' }}>Intervenant</label>
+                  <select 
+                    value={responderType || ''}
+                    onChange={(e) => setResponderType(e.target.value as any)}
+                    className="w-full p-2 border rounded"
+                    style={{ background: 'var(--sos-bg-surface-2)', borderColor: 'var(--sos-border)', color: 'var(--sos-text-primary)' }}
+                  >
+                    <option value="">-- Sélectionnez --</option>
+                    <option value="police">Police / Gendarmerie</option>
+                    <option value="samu">SAMU / Ambulance</option>
+                    <option value="fire">Pompiers / Protection Civile</option>
+                    <option value="other">Autre / Équipe interne</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm mb-1" style={{ color: 'var(--sos-text-secondary)' }}>Temps estimé (minutes)</label>
+                  <input 
+                    type="number" 
+                    min="0"
+                    placeholder="Ex: 15"
+                    value={etaMinutes}
+                    onChange={(e) => setEtaMinutes(e.target.value === '' ? '' : parseInt(e.target.value))}
+                    className="w-full p-2 border rounded"
+                    style={{ background: 'var(--sos-bg-surface-2)', borderColor: 'var(--sos-border)', color: 'var(--sos-text-primary)' }}
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm mb-1" style={{ color: 'var(--sos-text-secondary)' }}>Notes (optionnel)</label>
+                  <textarea 
+                    placeholder="Détails supplémentaires..."
+                    value={resolutionNotes}
+                    onChange={(e) => setResolutionNotes(e.target.value)}
+                    className="w-full p-2 border rounded"
+                    rows={2}
+                    style={{ background: 'var(--sos-bg-surface-2)', borderColor: 'var(--sos-border)', color: 'var(--sos-text-primary)' }}
+                  />
+                </div>
               </div>
             </div>
 

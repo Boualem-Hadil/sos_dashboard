@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Plus, X, Phone, Heart, Bandage, Flame, Wind, Brain, Skull } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
@@ -13,7 +13,29 @@ const STATUS_STYLES: Record<string, { color: string; bg: string; pulse?: boolean
   emergency: { color: '#E53935', bg: 'rgba(229,57,53,0.15)', pulse: true },
 };
 
+import { getEmergencies } from '@/lib/data-service';
+
 function WorkerSidePanel({ worker, onClose }: { worker: Worker; onClose: () => void }) {
+  const [history, setHistory] = useState<any[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(true);
+
+  React.useEffect(() => {
+    let mounted = true;
+    setLoadingHistory(true);
+    getEmergencies({ user_id: worker.id })
+      .then(res => {
+        if (mounted) {
+          setHistory(res);
+          setLoadingHistory(false);
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        if (mounted) setLoadingHistory(false);
+      });
+    return () => { mounted = false; };
+  }, [worker.id]);
+
   const st = STATUS_STYLES[worker.status] || STATUS_STYLES.offline;
   return (
     <motion.div
@@ -104,6 +126,43 @@ function WorkerSidePanel({ worker, onClose }: { worker: Worker; onClose: () => v
               <Phone className="w-3 h-3" /> {worker.medicalProfile.iceContact.phone}
             </a>
           </div>
+        </div>
+
+        {/* Emergency History */}
+        <div className="p-4 rounded-xl border mt-5" style={{ background: 'var(--sos-bg-surface-2)', borderColor: 'var(--sos-border)' }}>
+          <div className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--sos-text-muted)' }}>Historique des urgences</div>
+          {loadingHistory ? (
+            <div className="text-sm italic" style={{ color: 'var(--sos-text-muted)' }}>Chargement...</div>
+          ) : history.length > 0 ? (
+            <div className="flex flex-col gap-3">
+              {history.map(em => (
+                <div key={em.id} className="p-3 rounded-lg border" style={{ background: 'var(--sos-bg-surface)', borderColor: 'var(--sos-border)' }}>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-bold text-sm uppercase" style={{ color: 'var(--sos-text-primary)' }}>{em.type}</span>
+                    <span className="text-xs" style={{ color: 'var(--sos-text-muted)' }}>
+                      {new Date(em.started_at || em.startedAt).toLocaleDateString('fr-DZ', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    </span>
+                  </div>
+                  <div className="text-xs mb-1" style={{ color: 'var(--sos-text-secondary)' }}>
+                    Statut: <span className="font-semibold">{em.status === 'resolved' ? 'Résolue' : em.status}</span>
+                  </div>
+                  {em.responder_type && (
+                    <div className="text-xs mb-1" style={{ color: 'var(--sos-text-secondary)' }}>
+                      Intervenant: <span className="font-semibold capitalize">{em.responder_type}</span> 
+                      {em.eta_minutes ? ` (${em.eta_minutes} min)` : ''}
+                    </div>
+                  )}
+                  {em.notes && (
+                    <div className="text-xs italic mt-2" style={{ color: 'var(--sos-text-muted)' }}>
+                      "{em.notes}"
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-sm italic" style={{ color: 'var(--sos-text-muted)' }}>Aucune urgence enregistrée</div>
+          )}
         </div>
       </div>
     </motion.div>

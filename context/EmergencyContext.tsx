@@ -1,7 +1,8 @@
 'use client';
 import React, { createContext, useContext, useReducer, useCallback } from 'react';
-import type { Emergency, Worker, ToastMessage } from '@/types';
+import type { Emergency, Worker, ToastMessage, ResponderType } from '@/types'; // CHANGED: added ResponderType
 import { getWorkers, getEmergencies, getCompanyStats } from '@/lib/data-service';
+import { resolveEmergencyApi } from '@/lib/api'; // NEW
 
 interface EmergencyState {
   status: 'idle' | 'active' | 'resolved';
@@ -20,6 +21,7 @@ type Action =
   | { type: 'SET_INITIAL_DATA'; payload: { workers: Worker[]; emergencies: Emergency[]; company: any } }
   | { type: 'START_EMERGENCY'; payload: Emergency }
   | { type: 'RESOLVE_EMERGENCY' }
+  | { type: 'RESOLVE_EMERGENCY_WITH_DATA'; payload: Emergency }   // NEW: carries enriched SSE payload
   | { type: 'DISMISS_FLASH' }
   | { type: 'ADD_TOAST'; payload: ToastMessage }
   | { type: 'REMOVE_TOAST'; payload: string }
@@ -84,6 +86,23 @@ function reducer(state: EmergencyState, action: Action): EmergencyState {
         ),
       };
     }
+    // NEW: resolve with enriched data from the API response / SSE payload
+    case 'RESOLVE_EMERGENCY_WITH_DATA': {
+      const resolved = action.payload;
+      return {
+        ...state,
+        status: 'resolved',
+        currentEmergency: null,
+        liveCount: Math.max(0, state.liveCount - 1),
+        // Replace the matching entry in history (or prepend if not found)
+        emergencyHistory: state.emergencyHistory.some(e => e.id === resolved.id)
+          ? state.emergencyHistory.map(e => e.id === resolved.id ? resolved : e)
+          : [resolved, ...state.emergencyHistory],
+        workers: state.workers.map(w =>
+          w.id === resolved.workerId ? { ...w, status: 'active' } : w
+        ),
+      };
+    }
     case 'DISMISS_FLASH':
       return { ...state, showFlash: false };
     case 'ADD_TOAST':
@@ -102,6 +121,13 @@ function reducer(state: EmergencyState, action: Action): EmergencyState {
 interface EmergencyContextValue extends EmergencyState {
   startEmergency: (e: Emergency) => void;
   resolveEmergency: () => void;
+  resolveEmergencyWithData: (   // NEW
+    id: string,
+    status: 'resolved' | 'false_alarm',
+    responderType?: ResponderType,
+    etaMinutes?: number,
+    notes?: string,
+  ) => Promise<void>;
   dismissFlash: () => void;
   addToast: (toast: Omit<ToastMessage, 'id'>) => void;
   removeToast: (id: string) => void;
@@ -199,6 +225,42 @@ export function EmergencyProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'RESOLVE_EMERGENCY' });
   }, []);
 
+  // NEW: call the API, then update state with enriched response data
+  const resolveEmergencyWithData = useCallback(async (
+    id: string,
+    status: 'resolved' | 'false_alarm',
+    responderType?: ResponderType,
+    etaMinutes?: number,
+    notes?: string,
+  ) => {
+    const { getToken } = await import('@/lib/auth');
+    const token = getToken();
+    if (!token) return;
+    try {
+      const res = await resolveEmergencyApi(id, status, token, responderType, etaMinutes, notes);
+      // Build an enriched Emergency object from the API response
+      const apiEmergency = res?.data;
+      if (apiEmergency) {
+        // Map snake_case API fields to our camelCase Emergency type
+        const enriched: Emergency = {
+          ...(state.currentEmergency ?? ({} as Emergency)),
+          id: apiEmergency.id,
+          status: apiEmergency.status,
+          resolvedAt: apiEmergency.resolved_at,
+          notes: apiEmergency.notes,
+          responderType: apiEmergency.responder_type,
+          etaMinutes: apiEmergency.eta_minutes,
+        };
+        dispatch({ type: 'RESOLVE_EMERGENCY_WITH_DATA', payload: enriched });
+      } else {
+        dispatch({ type: 'RESOLVE_EMERGENCY' });
+      }
+    } catch (err) {
+      console.error('Failed to resolve emergency:', err);
+      throw err;
+    }
+  }, [state.currentEmergency]);
+
   const dismissFlash = useCallback(() => {
     dispatch({ type: 'DISMISS_FLASH' });
   }, []);
@@ -218,7 +280,7 @@ export function EmergencyProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <EmergencyContext.Provider value={{ ...state, startEmergency, resolveEmergency, dismissFlash, addToast, removeToast, addWorker }}>
+    <EmergencyContext.Provider value={{ ...state, startEmergency, resolveEmergency, resolveEmergencyWithData, dismissFlash, addToast, removeToast, addWorker }}>
       {children}
     </EmergencyContext.Provider>
   );

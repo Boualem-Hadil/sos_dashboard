@@ -7,8 +7,12 @@ import { ThemeProvider } from '@/context/ThemeContext';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'SOS Algérie — Tableau de bord sécurité',
+  title: 'EchoAlert — Tableau de bord sécurité',
   description: 'Plateforme B2B de gestion des urgences industrielles pour les entreprises algériennes.',
+  icons: {
+    icon: '/logo-icon.png',
+    apple: '/logo-icon.png',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

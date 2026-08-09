@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://10.252.67.57:8000';
 
 // ── Generic fetch helper ──────────────────────────────────────────────────────
 async function apiFetch(
@@ -12,6 +12,7 @@ async function apiFetch(
         ...options.headers,
     };
 
+    console.log(`[apiFetch] Fetching: ${BASE_URL}${endpoint}`);
     const response = await fetch(`${BASE_URL}${endpoint}`, {
         ...options,
         headers,
@@ -103,6 +104,7 @@ export async function getEmergenciesApi(
         limit?: number;
         type?: string;
         status?: string;
+        user_id?: string;
     }
 ) {
     const query = new URLSearchParams();
@@ -110,6 +112,7 @@ export async function getEmergenciesApi(
     if (params?.limit) query.set('limit', String(params.limit));
     if (params?.type) query.set('type', params.type);
     if (params?.status) query.set('status', params.status);
+    if (params?.user_id) query.set('user_id', params.user_id);
 
     return apiFetch(`/emergencies?${query.toString()}`, {}, token);
 }
@@ -134,14 +137,23 @@ export async function reportEmergencyApi(
     }, token);
 }
 
+// CHANGED: extended to carry new resolution fields while keeping PUT method
 export async function resolveEmergencyApi(
     id: string,
     status: 'resolved' | 'false_alarm',
-    token: string
+    token: string,
+    responderType?: 'police' | 'samu' | 'fire' | 'other',  // NEW
+    etaMinutes?: number,                                    // NEW
+    notes?: string,                                         // NEW
 ) {
     return apiFetch(`/emergencies/${id}/resolve`, {
         method: 'PUT',
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({
+            status,
+            ...(responderType !== undefined && { responder_type: responderType }),
+            ...(etaMinutes !== undefined && { eta_minutes: etaMinutes }),
+            ...(notes !== undefined && { resolution_notes: notes }),
+        }),
     }, token);
 }
 

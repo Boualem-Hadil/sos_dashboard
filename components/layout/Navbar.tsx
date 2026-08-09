@@ -1,5 +1,6 @@
 'use client';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { LogOut, Bell, User, Sun, Moon } from 'lucide-react';
 import { logout, getAuth } from '@/lib/auth';
 import { useEmergency } from '@/context/EmergencyContext';
@@ -29,12 +30,19 @@ export function Navbar() {
         boxShadow: 'var(--sos-shadow)',
       }}
     >
-      <div>
-        <div className="font-semibold text-sm" style={{ color: 'var(--sos-text-primary)' }}>
-          {user?.companyName ?? 'SOS Algérie'}
-        </div>
-        <div className="text-xs" style={{ color: 'var(--sos-text-muted)' }}>
-          Tableau de bord · Surveillance industrielle
+      <div className="flex items-center gap-3">
+        <Image
+          src={theme === 'dark' ? '/logo-dark.png' : '/logo-light.png'}
+          alt="EchoAlert"
+          width={180}
+          height={60}
+          priority
+          style={{ objectFit: 'contain', width: 'auto', height: 'auto', maxHeight: '48px' }}
+        />
+        <div className="hidden sm:block">
+          <div className="text-xs" style={{ color: 'var(--sos-text-muted)' }}>
+            {user?.companyName ?? 'Tableau de bord'} &middot; Surveillance industrielle
+          </div>
         </div>
       </div>
 

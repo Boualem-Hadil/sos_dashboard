@@ -1,7 +1,8 @@
 'use client';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, AlertTriangle, Heart, Settings, ShieldAlert, Shield } from 'lucide-react';
+import { LayoutDashboard, Users, AlertTriangle, Heart, Settings, Shield } from 'lucide-react';
 import { getAuth } from '@/lib/auth';
 import { useState, useEffect } from 'react';
 
@@ -32,23 +33,17 @@ export function Sidebar() {
     >
       {/* Logo */}
       <div
-        className="flex items-center gap-3 px-5 py-4"
-        style={{ borderBottom: '1px solid var(--sos-sidebar-border)' }}
+        className="flex items-center justify-center py-3"
+        style={{ borderBottom: '1px solid var(--sos-sidebar-border)', padding: '10px 12px' }}
       >
-        <div
-          className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{ background: 'var(--sos-accent)' }}
-        >
-          <ShieldAlert className="w-5 h-5 text-white" />
-        </div>
-        <div>
-          <div className="font-bold text-sm leading-tight" style={{ color: 'var(--sos-sidebar-text-active)' }}>
-            SOS Algérie
-          </div>
-          <div className="text-xs" style={{ color: 'var(--sos-sidebar-text)' }}>
-            Sécurité Industrielle
-          </div>
-        </div>
+        <Image
+          src="/logo-dark.png"
+          alt="EchoAlert"
+          width={220}
+          height={80}
+          priority
+          style={{ objectFit: 'contain', width: '100%', height: 'auto' }}
+        />
       </div>
 
       {/* Nav */}

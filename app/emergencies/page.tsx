@@ -1,11 +1,12 @@
 'use client';
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, X, Heart, Bandage, Flame, Wind, Brain, Skull, Clock, MapPin } from 'lucide-react';
+import { Download, X, Heart, Bandage, Flame, Wind, Brain, Skull, Clock, MapPin, CheckCircle } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useEmergency } from '@/context/EmergencyContext';
 import { formatDateTime, formatDuration, getEmergencyTypeLabel, getSeverityLabel, getStatusLabel, exportToCSV } from '@/lib/utils';
-import type { Emergency, EmergencyType } from '@/types';
+import type { Emergency, EmergencyType, ResponderType } from '@/types';
+import { Map } from "@/components/ui/map";
 
 const TYPE_ICONS: Record<EmergencyType, React.ReactNode> = {
   cardiac: <Heart className="w-4 h-4" style={{ color: '#E53935' }} />,
@@ -18,7 +19,133 @@ const TYPE_ICONS: Record<EmergencyType, React.ReactNode> = {
 const SEV_COLORS: Record<string, string> = { critical: '#E53935', moderate: '#FF9800', minor: '#4CAF50' };
 const STA_COLORS: Record<string, string> = { resolved: '#4CAF50', false_alarm: '#808080', active: '#E53935', in_progress: '#FF9800' };
 
-function EmergencyModal({ emergency, onClose }: { emergency: Emergency; onClose: () => void }) {
+// NEW: responder type labels
+const RESPONDER_LABELS: Record<ResponderType, string> = {
+  police: '🚔 Police',
+  samu:   '🚑 SAMU',
+  fire:   '🚒 Pompiers',
+  other:  '👥 Autre',
+};
+
+// NEW: small inline form shown when officer clicks "Résoudre"
+function ResolveModal({
+  emergency,
+  onClose,
+  onSubmit,
+}: {
+  emergency: Emergency;
+  onClose: () => void;
+  onSubmit: (responderType: ResponderType, etaMinutes?: number, notes?: string) => Promise<void>;
+}) {
+  const [responderType, setResponderType] = useState<ResponderType>('samu');
+  const [etaMinutes, setEtaMinutes]       = useState('');
+  const [notes, setNotes]                 = useState('');
+  const [submitting, setSubmitting]        = useState(false);
+  const [error, setError]                 = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setError(null);
+    try {
+      await onSubmit(
+        responderType,
+        etaMinutes ? parseInt(etaMinutes, 10) : undefined,
+        notes.trim() || undefined,
+      );
+      onClose();
+    } catch (err: any) {
+      setError(err?.message || 'Erreur lors de la résolution');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.75)' }}
+      onClick={onClose}>
+      <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+        className="w-full max-w-md rounded-2xl p-6 border" style={{ background: 'var(--sos-bg-surface)', borderColor: '#4CAF50' }}
+        onClick={e => e.stopPropagation()}>
+
+        {/* Header */}
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-5 h-5" style={{ color: '#4CAF50' }} />
+            <h2 className="text-lg font-bold" style={{ color: 'var(--sos-text-primary)' }}>Résoudre l&apos;urgence</h2>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--sos-bg-hover)]"
+            style={{ background: 'var(--sos-bg-surface-2)', border: '1px solid var(--sos-border)' }}>
+            <X className="w-4 h-4" style={{ color: 'var(--sos-text-secondary)' }} />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {/* Responder type */}
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--sos-text-muted)' }}>Type de secours *</div>
+            <div className="grid grid-cols-2 gap-2">
+              {(Object.keys(RESPONDER_LABELS) as ResponderType[]).map(rt => (
+                <button key={rt} type="button"
+                  onClick={() => setResponderType(rt)}
+                  className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left border"
+                  style={{
+                    background:   responderType === rt ? 'rgba(76,175,80,0.15)' : 'var(--sos-bg-surface-2)',
+                    borderColor:  responderType === rt ? '#4CAF50' : 'var(--sos-border)',
+                    color:        responderType === rt ? '#4CAF50'  : 'var(--sos-text-secondary)',
+                  }}>
+                  {RESPONDER_LABELS[rt]}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* ETA */}
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--sos-text-muted)' }}>
+              ETA (minutes) — optionnel
+            </label>
+            <input type="number" min={1} max={120} value={etaMinutes}
+              onChange={e => setEtaMinutes(e.target.value)}
+              placeholder="ex: 10"
+              className="mt-1.5 w-full px-4 py-2.5 rounded-xl text-sm outline-none transition-all"
+              style={{ background: 'var(--sos-bg-surface-2)', border: '1px solid var(--sos-border)', color: 'var(--sos-text-primary)' }} />
+          </div>
+
+          {/* Notes */}
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--sos-text-muted)' }}>
+              Notes — optionnel
+            </label>
+            <textarea rows={3} value={notes} onChange={e => setNotes(e.target.value)}
+              placeholder="Informations complémentaires..."
+              className="mt-1.5 w-full px-4 py-2.5 rounded-xl text-sm outline-none transition-all resize-none"
+              style={{ background: 'var(--sos-bg-surface-2)', border: '1px solid var(--sos-border)', color: 'var(--sos-text-primary)' }} />
+          </div>
+
+          {error && (
+            <div className="text-sm px-3 py-2 rounded-lg" style={{ background: 'rgba(229,57,53,0.1)', color: '#E53935', border: '1px solid rgba(229,57,53,0.3)' }}>
+              {error}
+            </div>
+          )}
+
+          <button type="submit" disabled={submitting}
+            className="w-full py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2"
+            style={{
+              background: submitting ? 'rgba(76,175,80,0.4)' : '#4CAF50',
+              color: '#fff',
+              opacity: submitting ? 0.7 : 1,
+            }}>
+            {submitting ? 'Résolution en cours...' : <><CheckCircle className="w-4 h-4" /> Confirmer la résolution</>}
+          </button>
+        </form>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+function EmergencyModal({ emergency, onClose, onResolve }: { emergency: Emergency; onClose: () => void; onResolve?: (e: Emergency) => void }) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }}
@@ -88,6 +215,15 @@ function EmergencyModal({ emergency, onClose }: { emergency: Emergency; onClose:
             <MapPin className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--sos-text-secondary)' }} />
             <span className="text-sm" style={{ color: 'var(--sos-text-primary)' }}>{emergency.location}</span>
           </div>
+          {/* NEW: Resolve button — only for active emergencies */}
+          {emergency.status === 'active' && onResolve && (
+            <button
+              onClick={() => onResolve(emergency)}
+              className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-bold text-sm transition-all"
+              style={{ background: 'rgba(76,175,80,0.12)', color: '#4CAF50', border: '1px solid rgba(76,175,80,0.4)' }}>
+              <CheckCircle className="w-4 h-4" /> Résoudre cette urgence
+            </button>
+          )}
         </div>
       </motion.div>
     </motion.div>
@@ -95,9 +231,10 @@ function EmergencyModal({ emergency, onClose }: { emergency: Emergency; onClose:
 }
 
 export default function EmergenciesPage() {
-  const { emergencyHistory, authError } = useEmergency();
+  const { emergencyHistory, authError, resolveEmergencyWithData } = useEmergency(); // CHANGED: added resolveEmergencyWithData
   const [filters, setFilters] = useState({ type: '', severity: '', status: '', worker: '' });
-  const [selected, setSelected] = useState<Emergency | null>(null);
+  const [selected, setSelected]           = useState<Emergency | null>(null);
+  const [resolvingEmergency, setResolvingEmergency] = useState<Emergency | null>(null); // NEW
 
   if (authError) {
     return <DashboardLayout><div className="flex h-full items-center justify-center text-red-500 font-bold text-2xl tracking-widest">{authError}</div></DashboardLayout>;
@@ -218,7 +355,35 @@ export default function EmergenciesPage() {
           </table>
         </div>
       </div>
-      <AnimatePresence>{selected && <EmergencyModal emergency={selected} onClose={() => setSelected(null)} />}</AnimatePresence>
+      <AnimatePresence>
+        {selected && (
+          <EmergencyModal
+            emergency={selected}
+            onClose={() => setSelected(null)}
+            onResolve={(e) => { setResolvingEmergency(e); }}  // NEW
+          />
+        )}
+      </AnimatePresence>
+      {/* NEW: ResolveModal rendered above EmergencyModal (z-60) */}
+      <AnimatePresence>
+        {resolvingEmergency && (
+          <ResolveModal
+            emergency={resolvingEmergency}
+            onClose={() => setResolvingEmergency(null)}
+            onSubmit={async (responderType, etaMinutes, notes) => {
+              await resolveEmergencyWithData(
+                resolvingEmergency.id,
+                'resolved',
+                responderType,
+                etaMinutes,
+                notes,
+              );
+              setSelected(null);
+              setResolvingEmergency(null);
+            }}
+          />
+        )}
+      </AnimatePresence>
     </DashboardLayout>
   );
 }

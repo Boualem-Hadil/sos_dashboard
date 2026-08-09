@@ -7,6 +7,7 @@ export type Severity = 'critical' | 'moderate' | 'minor';
 export type WorkerStatus = 'active' | 'offline' | 'emergency';
 export type EmergencyState = 'idle' | 'active' | 'resolved';
 export type EmergencyStatus = 'resolved' | 'false_alarm' | 'active' | 'in_progress';
+export type ResponderType = 'police' | 'samu' | 'fire' | 'other'; // NEW
 
 export interface Company {
   id: string;
@@ -70,6 +71,9 @@ export interface Emergency {
   notes?: string;
   companyId: string;
   medicalProfile?: MedicalProfile;
+  // NEW resolution fields
+  responderType?: ResponderType;
+  etaMinutes?: number;
 }
 
 export interface SafetyOfficer {
