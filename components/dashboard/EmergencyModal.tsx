@@ -78,6 +78,10 @@ export function EmergencyModal() {
         resolutionNotes || undefined
       );
       resolveEmergency();
+      // Clear all resolution form fields
+      setResponderType(undefined);
+      setEtaMinutes('');
+      setResolutionNotes('');
       addToast({
         type: 'success',
         title: 'Urgence résolue',
@@ -333,8 +337,8 @@ export function EmergencyModal() {
                 <a href="tel:14" className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 rounded-lg font-bold transition-colors text-sm shadow-lg shadow-orange-900/20">
                   <PhoneCall className="w-4 h-4" /> Pompiers (14)
                 </a>
-                <a href="tel:15" className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg font-bold transition-colors text-sm shadow-lg shadow-blue-900/20">
-                  <PhoneCall className="w-4 h-4" /> SAMU (15)
+                <a href="tel:14" className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg font-bold transition-colors text-sm shadow-lg shadow-blue-900/20">
+                  <PhoneCall className="w-4 h-4" /> SAMU (14)
                 </a>
                 <a href="tel:17" className="flex items-center gap-2 bg-blue-800 hover:bg-blue-900 text-white px-3 py-2 rounded-lg font-bold transition-colors text-sm shadow-lg shadow-blue-900/20">
                   <PhoneCall className="w-4 h-4" /> Police (17)
