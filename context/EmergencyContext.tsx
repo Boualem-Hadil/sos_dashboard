@@ -27,7 +27,9 @@ type Action =
   | { type: 'REMOVE_TOAST'; payload: string }
   | { type: 'UPDATE_WORKERS'; payload: Worker[] }
   | { type: 'ADD_WORKER'; payload: Worker }
-  | { type: 'SET_AUTH_ERROR'; payload: string };
+  | { type: 'SET_AUTH_ERROR'; payload: string }
+  // NEW: live-update actions for heartbeat / ping
+  | { type: 'UPDATE_EMERGENCY_FIELDS'; payload: Partial<Emergency> & { id: string } };
 
 const initialState: EmergencyState = {
   status: 'idle',
@@ -113,6 +115,15 @@ function reducer(state: EmergencyState, action: Action): EmergencyState {
       return { ...state, workers: action.payload };
     case 'SET_AUTH_ERROR':
       return { ...state, authError: action.payload, isLoading: false };
+    // NEW: live-update current emergency fields (heartbeat / ping events)
+    case 'UPDATE_EMERGENCY_FIELDS': {
+      const { id, ...fields } = action.payload;
+      if (!state.currentEmergency || state.currentEmergency.id !== id) return state;
+      return {
+        ...state,
+        currentEmergency: { ...state.currentEmergency, ...fields },
+      };
+    }
     default:
       return state;
   }
@@ -128,6 +139,7 @@ interface EmergencyContextValue extends EmergencyState {
     etaMinutes?: number,
     notes?: string,
   ) => Promise<void>;
+  updateEmergencyFields: (id: string, fields: Partial<Emergency>) => void; // NEW
   dismissFlash: () => void;
   addToast: (toast: Omit<ToastMessage, 'id'>) => void;
   removeToast: (id: string) => void;
@@ -279,8 +291,13 @@ export function EmergencyProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'ADD_WORKER', payload: worker });
   }, []);
 
+  // NEW: live-update a subset of the current emergency's fields (heartbeat / ping)
+  const updateEmergencyFields = useCallback((id: string, fields: Partial<Emergency>) => {
+    dispatch({ type: 'UPDATE_EMERGENCY_FIELDS', payload: { id, ...fields } });
+  }, []);
+
   return (
-    <EmergencyContext.Provider value={{ ...state, startEmergency, resolveEmergency, resolveEmergencyWithData, dismissFlash, addToast, removeToast, addWorker }}>
+    <EmergencyContext.Provider value={{ ...state, startEmergency, resolveEmergency, resolveEmergencyWithData, updateEmergencyFields, dismissFlash, addToast, removeToast, addWorker }}>
       {children}
     </EmergencyContext.Provider>
   );

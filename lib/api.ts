@@ -157,6 +157,26 @@ export async function resolveEmergencyApi(
     }, token);
 }
 
+// NEW: Officer sends "are you OK?" ping to the worker
+export async function sendPingApi(emergencyId: string, token: string) {
+    return apiFetch(`/emergencies/${emergencyId}/ping`, {
+        method: 'POST',
+    }, token);
+}
+
+// NEW: Get workers near the emergency location (radius default 5 km)
+export async function getNearbyWorkersApi(
+    emergencyId: string,
+    token: string,
+    radiusKm: number = 5,
+) {
+    return apiFetch(
+        `/emergencies/${emergencyId}/nearby-workers?radius_km=${radiusKm}`,
+        {},
+        token,
+    );
+}
+
 // ── Company ───────────────────────────────────────────────────────────────────
 export async function getCompanyApi(id: string, token: string) {
     return apiFetch(`/companies/${id}`, {}, token);

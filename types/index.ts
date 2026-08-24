@@ -58,6 +58,7 @@ export interface Emergency {
   workerId: string;
   workerName: string;
   workerBadge: string;
+  workerPhone?: string;              // NEW: for direct call button
   unit: string;
   type: EmergencyType;
   severity: Severity;
@@ -71,9 +72,15 @@ export interface Emergency {
   notes?: string;
   companyId: string;
   medicalProfile?: MedicalProfile;
-  // NEW resolution fields
+  // Resolution fields
   responderType?: ResponderType;
   etaMinutes?: number;
+  // Nearby-workers / ping feature fields (NEW)
+  lastSeenActive?: string;           // ISO datetime
+  pingStatus?: 'none' | 'sent' | 'acked' | 'expired';
+  notResponding?: boolean;           // derived: ping expired + no ack
+  heartbeatLat?: number;             // latest live GPS from heartbeat
+  heartbeatLng?: number;
 }
 
 export interface SafetyOfficer {
@@ -119,4 +126,15 @@ export interface AuthUser {
   companyId: string;
   companyName: string;
   token: string;
+}
+
+// NEW: nearby worker returned by GET /emergencies/{id}/nearby-workers
+export interface NearbyWorker {
+  id: string;
+  full_name: string;
+  phone: string | null;
+  match_type: 'gps' | 'unit' | 'both' | 'company';
+  distance_km: number | null;
+  latitude: number | null;
+  longitude: number | null;
 }

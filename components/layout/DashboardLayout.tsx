@@ -66,7 +66,7 @@ function FlashOverlay() {
 }
 
 function SSEInitializer() {
-  const { startEmergency, resolveEmergency, addWorker, addToast } = useEmergency();
+  const { startEmergency, resolveEmergency, addWorker, addToast, updateEmergencyFields } = useEmergency();
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
 
@@ -97,6 +97,10 @@ function SSEInitializer() {
           startedAt: emergencyData.started_at,
           resolvedAt: emergencyData.resolved_at,
           workerName: userData ? userData.full_name : 'Unknown Worker',
+          workerPhone: userData?.phone || undefined,  // NEW: capture phone for direct call
+          workerBadge: userData?.employee_id || '',
+          unit: userData?.unit || 'Non assignée',
+          companyId: emergencyData.company_id || '',
           medicalProfile: data.medical_profile ? {
             bloodType: data.medical_profile.blood_type || 'Inconnu',
             allergies: data.medical_profile.allergies || [],
@@ -114,6 +118,37 @@ function SSEInitializer() {
         startEmergency(mappedEmergency as any);
       } else if (type === 'EMERGENCY_RESOLVED') {
         resolveEmergency();
+
+      // ── NEW: live GPS heartbeat from the worker ────────────────────────────
+      } else if (type === 'HEARTBEAT_UPDATED') {
+        // data: { emergency_id, latitude, longitude, last_seen_active, not_responding }
+        updateEmergencyFields(data.emergency_id, {
+          heartbeatLat:    data.latitude,
+          heartbeatLng:    data.longitude,
+          lastSeenActive:  data.last_seen_active,
+          notResponding:   data.not_responding ?? false,
+          gpsCoordinates:  { lat: data.latitude, lng: data.longitude },
+        });
+
+      // ── NEW: officer sent an "are you OK?" ping ───────────────────────────
+      } else if (type === 'PING_SENT') {
+        updateEmergencyFields(data.emergency_id, {
+          pingStatus: 'sent',
+          // notResponding will flip to true after 60 s — polled by the modal
+        });
+
+      // ── NEW: worker acknowledged the ping ─────────────────────────────────
+      } else if (type === 'PING_ACKED') {
+        updateEmergencyFields(data.emergency_id, {
+          pingStatus:    'acked',
+          notResponding: false,
+        });
+        addToast({
+          type:    'success',
+          title:   '✅ Travailleur répond',
+          message: 'Le travailleur a confirmé qu\'il va bien.',
+        });
+
       } else if (type === 'worker_registered') {
         // Map backend UserOut to frontend Worker type
         const newWorker = {
@@ -121,9 +156,9 @@ function SSEInitializer() {
           employeeId: data.employee_id || '',
           firstName: data.full_name ? data.full_name.split(' ')[0] : 'Nouveau',
           lastName: data.full_name ? data.full_name.split(' ').slice(1).join(' ') : 'Travailleur',
-          unit: 'Non assignée',
-          department: 'Non défini',
-          position: 'Employé',
+          unit: data.unit || 'Non assignée',
+          department: data.department || 'Non défini',
+          position: data.position || 'Employé',
           phone: data.phone || '',
           status: 'active',
           bloodType: 'Inconnu',

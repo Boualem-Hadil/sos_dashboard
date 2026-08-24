@@ -6,7 +6,6 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useEmergency } from '@/context/EmergencyContext';
 import { formatDateTime, formatDuration, getEmergencyTypeLabel, getSeverityLabel, getStatusLabel, exportToCSV } from '@/lib/utils';
 import type { Emergency, EmergencyType, ResponderType } from '@/types';
-import { Map } from "@/components/ui/map";
 
 const TYPE_ICONS: Record<EmergencyType, React.ReactNode> = {
   cardiac: <Heart className="w-4 h-4" style={{ color: '#E53935' }} />,
