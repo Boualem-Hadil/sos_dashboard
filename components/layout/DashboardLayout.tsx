@@ -66,7 +66,7 @@ function FlashOverlay() {
 }
 
 function SSEInitializer() {
-  const { startEmergency, resolveEmergency, addWorker, addToast, updateEmergencyFields } = useEmergency();
+  const { startEmergency, resolveEmergency, resolveEmergencyById, addWorker, addToast, updateEmergencyFields } = useEmergency();
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
 
@@ -101,6 +101,7 @@ function SSEInitializer() {
           workerBadge: userData?.employee_id || '',
           unit: userData?.unit || 'Non assignée',
           companyId: emergencyData.company_id || '',
+          possible_duplicate_of: data.possible_duplicate_of || [],
           medicalProfile: data.medical_profile ? {
             bloodType: data.medical_profile.blood_type || 'Inconnu',
             allergies: data.medical_profile.allergies || [],
@@ -117,7 +118,14 @@ function SSEInitializer() {
         };
         startEmergency(mappedEmergency as any);
       } else if (type === 'EMERGENCY_RESOLVED') {
-        resolveEmergency();
+        // Use id-based resolve to avoid the race condition where the modal button
+        // already removed this emergency and would otherwise remove the next one.
+        const resolvedId = data?.emergency?.id;
+        if (resolvedId) {
+          resolveEmergencyById(resolvedId);
+        } else {
+          resolveEmergency(); // fallback (should not happen)
+        }
 
       // ── NEW: live GPS heartbeat from the worker ────────────────────────────
       } else if (type === 'HEARTBEAT_UPDATED') {

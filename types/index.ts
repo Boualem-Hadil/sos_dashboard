@@ -81,6 +81,8 @@ export interface Emergency {
   notResponding?: boolean;           // derived: ping expired + no ack
   heartbeatLat?: number;             // latest live GPS from heartbeat
   heartbeatLng?: number;
+  // Multi-emergency: duplicate advisory (additive, optional)
+  possible_duplicate_of?: string[];  // ids of nearby active emergencies
 }
 
 export interface SafetyOfficer {

@@ -24,7 +24,10 @@ const SOSMap = dynamic(() => import('@/components/dashboard/Map'), {
 const PING_WINDOW_MS = 60_000;
 
 export function EmergencyModal() {
-  const { status, currentEmergency, resolveEmergency, addToast } = useEmergency();
+  const {
+    status, currentEmergency, resolveEmergency, resolveEmergencyById, addToast,
+    activeEmergencies, selectedEmergencyId, selectEmergency,
+  } = useEmergency();
   const [isMuted, setIsMuted] = useState(false);
   const [isResolving, setIsResolving] = useState(false);
   const [isMapExpanded, setIsMapExpanded] = useState(false);
@@ -121,23 +124,75 @@ export function EmergencyModal() {
     };
   }, [status, currentEmergency, isMuted]);
 
+  const multiMode = activeEmergencies.length > 1;
+
+  // ── Second audio: two quick beeps at 1200 Hz every 20 s when multi-emergency ──
+  const multiBeepRef = useRef<NodeJS.Timeout | null>(null);
+  useEffect(() => {
+    if (multiMode && !isMuted && audioCtxRef.current) {
+      const playDoubleBeep = () => {
+        if (!audioCtxRef.current) return;
+        if (audioCtxRef.current.state === 'suspended') audioCtxRef.current.resume();
+        [0, 0.18].forEach((offset) => {
+          const osc = audioCtxRef.current!.createOscillator();
+          const gain = audioCtxRef.current!.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(1200, audioCtxRef.current!.currentTime + offset);
+          gain.gain.setValueAtTime(0, audioCtxRef.current!.currentTime + offset);
+          gain.gain.linearRampToValueAtTime(0.8, audioCtxRef.current!.currentTime + offset + 0.04);
+          gain.gain.linearRampToValueAtTime(0, audioCtxRef.current!.currentTime + offset + 0.18);
+          osc.connect(gain);
+          gain.connect(audioCtxRef.current!.destination);
+          osc.start(audioCtxRef.current!.currentTime + offset);
+          osc.stop(audioCtxRef.current!.currentTime + offset + 0.18);
+        });
+      };
+      playDoubleBeep(); // play immediately on second emergency arrival
+      multiBeepRef.current = setInterval(playDoubleBeep, 20_000);
+    } else {
+      if (multiBeepRef.current) clearInterval(multiBeepRef.current);
+    }
+    return () => { if (multiBeepRef.current) clearInterval(multiBeepRef.current); };
+  }, [multiMode, isMuted]);
+
+  // Reset per-emergency UI state when selected emergency switches
+  const prevSelectedRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (selectedEmergencyId !== prevSelectedRef.current) {
+      prevSelectedRef.current = selectedEmergencyId;
+      setIsMapExpanded(false);
+      setShowNearby(false);
+      setNearbyWorkers([]);
+      setNearbyError(null);
+      setPingCooldownLeft(0);
+      setResponderType(undefined);
+      setEtaMinutes('');
+      setResolutionNotes('');
+    }
+  }, [selectedEmergencyId]);
+
   if (status !== 'active' || !currentEmergency) return null;
 
   // ── Resolve handler ────────────────────────────────────────────────────────
   const handleResolve = async () => {
+    // Capture the id BEFORE the await — the SSE EMERGENCY_RESOLVED echo may arrive
+    // before the HTTP response returns, which would already move selectedEmergencyId
+    // to the next emergency. Using resolveEmergencyById is idempotent: the second
+    // call (whichever arrives second, SSE or HTTP response) is a no-op.
+    const emergencyId = currentEmergency.id;
     setIsResolving(true);
     try {
       const token = getToken();
       if (!token) throw new Error('No token');
       await resolveEmergencyApi(
-        currentEmergency.id,
+        emergencyId,
         'resolved',
         token,
         responderType,
         etaMinutes === '' ? undefined : Number(etaMinutes),
         resolutionNotes || undefined,
       );
-      resolveEmergency();
+      resolveEmergencyById(emergencyId); // id-based, no-ops if SSE already handled it
       setResponderType(undefined);
       setEtaMinutes('');
       setResolutionNotes('');
@@ -158,10 +213,9 @@ export function EmergencyModal() {
       const token = getToken();
       if (!token) throw new Error('No token');
       await sendPingApi(currentEmergency.id, token);
-      addToast({ type: 'info', title: '🔔 Ping envoyé', message: 'Le travailleur a 60 secondes pour répondre.' });
-      // Start cooldown: a bit longer than the response window so officer
-      // can see whether it was answered before sending another
-      setPingCooldownLeft(70);
+      addToast({ type: 'info', title: '🔔 Ping envoyé', message: 'Le travailleur a 10 secondes pour répondre.' });
+      // Cooldown: 10 s so officer can quickly re-ping if needed
+      setPingCooldownLeft(10);
     } catch {
       addToast({ type: 'error', title: 'Erreur', message: 'Impossible d\'envoyer le ping.' });
     } finally {
@@ -216,14 +270,21 @@ export function EmergencyModal() {
           initial={{ scale: 0.9, y: 20 }}
           animate={{ scale: 1, y: 0 }}
           exit={{ scale: 0.9, y: 20 }}
-          className="relative w-full max-w-3xl border-2 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] overflow-y-auto"
+          className="relative w-full max-w-5xl border-2 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh]"
           style={{ background: 'var(--sos-bg-surface)', borderColor: '#E53935' }}
         >
           {/* Header */}
           <div className="bg-red-600 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
             <div className="flex items-center gap-3 text-white">
               <ShieldAlert className="w-8 h-8 animate-pulse" />
-              <h2 className="text-2xl font-bold tracking-wider uppercase">Urgence Détectée</h2>
+              <h2 className="text-2xl font-bold tracking-wider uppercase">
+                Urgence Détectée
+                {multiMode && (
+                  <span className="ml-3 text-base font-semibold bg-white/20 px-2 py-0.5 rounded-full">
+                    {activeEmergencies.length} actives
+                  </span>
+                )}
+              </h2>
             </div>
             <button
               onClick={() => setIsMuted(!isMuted)}
@@ -234,7 +295,48 @@ export function EmergencyModal() {
             </button>
           </div>
 
-          <div className="p-6 md:p-8 flex flex-col gap-6">
+          {/* Body: sidebar (multi only) + main content */}
+          <div className="flex flex-1 overflow-hidden">
+
+            {/* ── Multi-emergency sidebar ───────────────────────────────────── */}
+            {multiMode && (
+              <div className="w-64 flex-shrink-0 border-r overflow-y-auto" style={{ borderColor: 'var(--sos-border)', background: 'var(--sos-bg-surface-2)' }}>
+                <div className="px-4 py-3 text-sm font-bold uppercase tracking-wider" style={{ color: 'var(--sos-text-muted)' }}>Urgences actives</div>
+                {activeEmergencies.map((e) => {
+                  const isSelected = e.id === selectedEmergencyId;
+                  const elapsedMin = Math.floor((Date.now() - new Date(e.startedAt).getTime()) / 60000);
+                  const severityColor = e.severity === 'critical' ? '#ef4444' : e.severity === 'moderate' ? '#f59e0b' : '#22c55e';
+                  const hasDuplicate = (e.possible_duplicate_of?.length ?? 0) > 0;
+                  return (
+                    <button
+                      key={e.id}
+                      onClick={() => selectEmergency(e.id)}
+                      className="w-full text-left px-4 py-4 border-b transition-colors"
+                      style={{
+                        borderColor: 'var(--sos-border)',
+                        background: isSelected ? 'rgba(239,68,68,0.12)' : 'transparent',
+                        borderLeft: isSelected ? '4px solid #ef4444' : '4px solid transparent',
+                      }}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: severityColor }} />
+                        <span className="text-sm font-bold truncate" style={{ color: 'var(--sos-text-primary)' }}>{e.workerName}</span>
+                      </div>
+                      <div className="text-sm capitalize font-medium" style={{ color: 'var(--sos-text-secondary)' }}>{e.type}</div>
+                      <div className="text-xs mt-0.5" style={{ color: 'var(--sos-text-muted)' }}>{elapsedMin} min</div>
+                      {hasDuplicate && (
+                        <div className="mt-1.5 text-xs font-semibold" style={{ color: '#f59e0b' }}>
+                          ⚠ doublon possible
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* ── Main modal content ────────────────────────────────────────── */}
+            <div className="flex-1 overflow-y-auto p-6 md:p-8 flex flex-col gap-6">
 
             {/* ── NOT-RESPONDING ALERT (Phase D) ─────────────────────────────── */}
             <AnimatePresence>
@@ -555,6 +657,18 @@ export function EmergencyModal() {
                   : isSendingPing ? 'Envoi...' : 'Envoyer un ping'}
               </button>
 
+              {/* Ping status badge — shown after a ping is sent */}
+              {currentEmergency.pingStatus === 'acked' && (
+                <div className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold animate-pulse" style={{ background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.5)', color: '#22c55e' }}>
+                  <CheckCircle className="w-4 h-4" /> ✅ Travailleur a répondu — il va bien
+                </div>
+              )}
+              {currentEmergency.pingStatus === 'sent' && pingCooldownLeft > 0 && (
+                <div className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold" style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.4)', color: '#F59E0B' }}>
+                  <Bell className="w-4 h-4 animate-bounce" /> En attente de réponse...
+                </div>
+              )}
+
               <button
                 onClick={handleFindNearby}
                 disabled={isLoadingNearby}
@@ -664,7 +778,8 @@ export function EmergencyModal() {
               </div>
             </div>
 
-          </div>
+            </div>{/* end main content */}
+          </div>{/* end flex body */}
         </motion.div>
       </motion.div>
     </AnimatePresence>
