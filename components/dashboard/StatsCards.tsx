@@ -17,12 +17,12 @@ export function StatsCards() {
   const cards = [
     {
       label: 'Total Travailleurs',
-      value: `${company.currentWorkers}/${company.maxWorkers}`,
+      value: `${company.current_users || 0}/${company.max_users || 0}`,
       icon: Users,
       color: 'var(--sos-success)',
       muted: 'var(--sos-success-muted)',
       border: 'rgba(16,185,129,0.20)',
-      sub: `${company.maxWorkers - company.currentWorkers} postes disponibles`,
+      sub: `${(company.max_users || 0) - (company.current_users || 0)} postes disponibles`,
     },
     {
       label: 'Actifs maintenant',
@@ -33,16 +33,7 @@ export function StatsCards() {
       border: 'rgba(59,130,246,0.20)',
       sub: 'En service actuellement',
     },
-    {
-      label: 'Urgences en direct',
-      value: liveCount,
-      icon: AlertTriangle,
-      color: 'var(--sos-accent)',
-      muted: liveCount > 0 ? 'var(--sos-accent-muted)' : 'transparent',
-      border: liveCount > 0 ? 'var(--sos-accent-border)' : 'var(--sos-border)',
-      sub: liveCount > 0 ? '⚠ Intervention requise' : 'Aucune urgence active',
-      pulse: liveCount > 0,
-    },
+
     {
       label: 'Incidents ce mois',
       value: thisMonth,
@@ -55,7 +46,7 @@ export function StatsCards() {
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       {cards.map((c, i) => (
         <div
           key={i}

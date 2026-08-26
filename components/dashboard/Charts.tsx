@@ -6,8 +6,14 @@ import { getEmergencyTypeLabel } from '@/lib/utils';
 import type { EmergencyType } from '@/types';
 
 const TYPE_COLORS: Record<string, string> = {
-  cardiac: '#E53935', trauma: '#FF9800', fire: '#FF5722',
-  respiratory: '#2196F3', neurological: '#9C27B0', poisoning: '#4CAF50'
+  cardiac:      '#E53935',  // red
+  trauma:       '#FF9800',  // orange
+  fire:         '#FF5722',  // deep orange
+  respiratory:  '#2196F3',  // blue
+  neurological: '#9C27B0',  // purple
+  poisoning:    '#4CAF50',  // green
+  medical:      '#00BCD4',  // teal/cyan
+  police:       '#3F51B5',  // indigo
 };
 
 export function EmergencyTypeChart() {
@@ -15,11 +21,12 @@ export function EmergencyTypeChart() {
   
   const distribution = Object.entries(
     emergencyHistory.reduce((acc, e) => {
-      acc[e.type] = (acc[e.type] || 0) + 1;
+      const type = e.type.toLowerCase();
+      acc[type] = (acc[type] || 0) + 1;
       return acc;
     }, {} as Record<string, number>)
   ).map(([type, value]) => ({
-    name: getEmergencyTypeLabel(type as EmergencyType),
+    name: getEmergencyTypeLabel(type as EmergencyType) || type,
     value,
     color: TYPE_COLORS[type] || '#808080'
   }));

@@ -1,16 +1,18 @@
 'use client';
-import { Heart, Bandage, Flame, Wind, Brain, Skull } from 'lucide-react';
+import { Heart, Bandage, Flame, Wind, Brain, Skull, Stethoscope, Shield } from 'lucide-react';
 import { useEmergency } from '@/context/EmergencyContext';
 import { formatDateTime, getEmergencyTypeLabel, getSeverityLabel, getStatusLabel } from '@/lib/utils';
 import type { EmergencyType } from '@/types';
 
-const TYPE_ICONS: Record<EmergencyType, React.ReactNode> = {
-  cardiac:      <Heart    className="w-3.5 h-3.5" style={{ color: 'var(--sos-accent)' }} />,
-  trauma:       <Bandage  className="w-3.5 h-3.5" style={{ color: 'var(--sos-warning)' }} />,
-  fire:         <Flame    className="w-3.5 h-3.5" style={{ color: 'var(--sos-warning)' }} />,
-  respiratory:  <Wind     className="w-3.5 h-3.5" style={{ color: 'var(--sos-info)' }} />,
-  neurological: <Brain    className="w-3.5 h-3.5" style={{ color: '#A78BFA' }} />,
-  poisoning:    <Skull    className="w-3.5 h-3.5" style={{ color: 'var(--sos-success)' }} />,
+const TYPE_ICONS: Record<string, React.ReactNode> = {
+  cardiac:      <Heart        className="w-3.5 h-3.5" style={{ color: '#E53935' }} />,
+  trauma:       <Bandage      className="w-3.5 h-3.5" style={{ color: 'var(--sos-warning)' }} />,
+  fire:         <Flame        className="w-3.5 h-3.5" style={{ color: 'var(--sos-warning)' }} />,
+  respiratory:  <Wind         className="w-3.5 h-3.5" style={{ color: 'var(--sos-info)' }} />,
+  neurological: <Brain        className="w-3.5 h-3.5" style={{ color: '#A78BFA' }} />,
+  poisoning:    <Skull        className="w-3.5 h-3.5" style={{ color: 'var(--sos-success)' }} />,
+  medical:      <Stethoscope  className="w-3.5 h-3.5" style={{ color: '#00BCD4' }} />,
+  police:       <Shield       className="w-3.5 h-3.5" style={{ color: '#3F51B5' }} />,
 };
 
 const SEVERITY: Record<string, { color: string; label: string }> = {
@@ -81,9 +83,9 @@ export function RecentEmergencies() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1.5">
-                      {TYPE_ICONS[e.type]}
+                      {TYPE_ICONS[e.type.toLowerCase() as EmergencyType] || TYPE_ICONS.cardiac}
                       <span className="text-xs" style={{ color: 'var(--sos-text-secondary)' }}>
-                        {getEmergencyTypeLabel(e.type)}
+                        {getEmergencyTypeLabel(e.type.toLowerCase() as EmergencyType) || e.type}
                       </span>
                     </div>
                   </td>

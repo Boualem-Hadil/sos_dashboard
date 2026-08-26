@@ -45,15 +45,17 @@ export function formatDuration(minutes: number): string {
 }
 
 export function getEmergencyTypeLabel(type: EmergencyType): string {
-  const labels: Record<EmergencyType, string> = {
-    cardiac: 'Cardiaque',
-    trauma: 'Traumatisme',
-    fire: 'Incendie',
-    respiratory: 'Respiratoire',
+  const labels: Record<string, string> = {
+    cardiac:      'Cardiaque',
+    trauma:       'Traumatisme',
+    fire:         'Incendie',
+    respiratory:  'Respiratoire',
     neurological: 'Neurologique',
-    poisoning: 'Intoxication',
+    poisoning:    'Intoxication',
+    medical:      'Médical',
+    police:       'Police',
   };
-  return labels[type];
+  return labels[type] || type;
 }
 
 export function getSeverityLabel(severity: Severity): string {

@@ -21,7 +21,10 @@ async function apiFetch(
     const data = await response.json();
 
     if (!response.ok) {
-        const error: any = new Error(data.message || data.detail || 'Erreur serveur');
+        const errorDetail = data.detail 
+            ? (typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail))
+            : (data.message || 'Erreur serveur');
+        const error: any = new Error(errorDetail);
         error.status = response.status;
         throw error;
     }

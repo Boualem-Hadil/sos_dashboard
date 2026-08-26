@@ -48,6 +48,19 @@ export function EmergencyModal() {
   const [isLoadingNearby, setIsLoadingNearby] = useState(false);
   const [nearbyError, setNearbyError] = useState<string | null>(null);
 
+  // ── Reset states when no emergencies are active ─────────────────────────────
+  useEffect(() => {
+    if (activeEmergencies.length === 0) {
+      setIsMuted(false);
+      setIsMapExpanded(false);
+      setResponderType(undefined);
+      setEtaMinutes('');
+      setResolutionNotes('');
+      setShowNearby(false);
+      setNearbyWorkers([]);
+    }
+  }, [activeEmergencies.length]);
+
   // ── Not-responding poll: after PING_SENT, flip notResponding after 60 s ───
   const notRespondingRef = useRef(false);
   const notRespondingTimer = useRef<NodeJS.Timeout | null>(null);

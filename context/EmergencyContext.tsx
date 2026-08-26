@@ -249,7 +249,7 @@ export function EmergencyProvider({ children }: { children: React.ReactNode }) {
 
         const [fetchedWorkers, fetchedEmergencies, fetchedCompanies] = await Promise.all([
           getWorkers(),
-          getEmergencies(),
+          getEmergencies({ limit: 500 }),
           getCompanyStats(companyId).catch(() => null)
         ]);
 

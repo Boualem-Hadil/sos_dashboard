@@ -74,6 +74,7 @@ export async function getEmergencies(filters?: {
     type?: string;
     status?: string;
     page?: number;
+    limit?: number;
     user_id?: string;
 }) {
     if (USE_MOCK) {

@@ -1,7 +1,6 @@
 'use client';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { StatsCards } from '@/components/dashboard/StatsCards';
-import { LiveEmergencyPanel } from '@/components/dashboard/LiveEmergencyPanel';
 import { RecentEmergencies } from '@/components/dashboard/RecentEmergencies';
 import { EmergencyTypeChart, MonthlyIncidentsChart } from '@/components/dashboard/Charts';
 import { useEmergency } from '@/context/EmergencyContext';
@@ -25,7 +24,6 @@ export default function DashboardPage() {
           <p className="text-sm mt-1" style={{ color: 'var(--sos-text-secondary)' }}>Surveillance en temps réel — {company.name}</p>
         </div>
         <StatsCards />
-        <LiveEmergencyPanel />
         <div className="grid grid-cols-2 gap-4">
           <EmergencyTypeChart />
           <MonthlyIncidentsChart />
