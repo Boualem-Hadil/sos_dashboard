@@ -2,6 +2,17 @@
 import { Users, Zap, AlertTriangle, Calendar } from 'lucide-react';
 import { useEmergency } from '@/context/EmergencyContext';
 
+interface CardItem {
+  label: string;
+  value: string | number;
+  icon: any;
+  color: string;
+  muted: string;
+  border: string;
+  sub: string;
+  pulse?: boolean;
+}
+
 export function StatsCards() {
   const { workers, liveCount, emergencyHistory, company, isLoading } = useEmergency();
 
@@ -14,7 +25,7 @@ export function StatsCards() {
     return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
   }).length;
 
-  const cards = [
+  const cards: CardItem[] = [
     {
       label: 'Total Travailleurs',
       value: `${company.current_users || 0}/${company.max_users || 0}`,

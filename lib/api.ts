@@ -71,6 +71,13 @@ export async function getMeApi(token: string) {
     return apiFetch('/auth/me', {}, token);
 }
 
+export async function updateDutyApi(isOnDuty: boolean, token: string) {
+    return apiFetch('/users/duty', {
+        method: 'PUT',
+        body: JSON.stringify({ is_on_duty: isOnDuty }),
+    }, token);
+}
+
 // ── Workers ───────────────────────────────────────────────────────────────────
 export async function getWorkersApi(token: string) {
     return apiFetch('/users', {}, token);
@@ -78,6 +85,26 @@ export async function getWorkersApi(token: string) {
 
 export async function getWorkerApi(id: string, token: string) {
     return apiFetch(`/users/${id}`, {}, token);
+}
+
+export async function addWorkerApi(data: any, token: string) {
+    return apiFetch('/users', {
+        method: 'POST',
+        body: JSON.stringify(data),
+    }, token);
+}
+
+export async function updateWorkerApi(id: string, data: any, token: string) {
+    return apiFetch(`/users/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+    }, token);
+}
+
+export async function deleteWorkerApi(id: string, token: string) {
+    return apiFetch(`/users/${id}`, {
+        method: 'DELETE',
+    }, token);
 }
 
 export async function syncMedicalProfileApi(
@@ -94,6 +121,26 @@ export async function syncMedicalProfileApi(
     token: string
 ) {
     return apiFetch('/users/medical-profile', {
+        method: 'PUT',
+        body: JSON.stringify(profile),
+    }, token);
+}
+
+export async function updateWorkerMedicalApi(
+    id: string,
+    profile: {
+        blood_type: string;
+        is_universal_donor: boolean;
+        chronic_diseases: string[];
+        allergies: string[];
+        emergency_notes: string;
+        ice_contact_name: string;
+        ice_contact_relation: string;
+        ice_contact_phone: string;
+    },
+    token: string
+) {
+    return apiFetch(`/users/${id}/medical-profile`, {
         method: 'PUT',
         body: JSON.stringify(profile),
     }, token);
@@ -180,9 +227,69 @@ export async function getNearbyWorkersApi(
     );
 }
 
+// ── Chat ──────────────────────────────────────────────────────────────────────
+export async function getMessagesApi(emergencyId: string, token: string) {
+    return apiFetch(`/emergencies/${emergencyId}/messages`, {}, token);
+}
+
+export async function sendTextMessageApi(emergencyId: string, content: string, token: string) {
+    return apiFetch(`/emergencies/${emergencyId}/messages/text`, {
+        method: 'POST',
+        body: JSON.stringify({ content }),
+    }, token);
+}
+
+export async function sendVoiceMessageApi(emergencyId: string, audioBlob: Blob, token: string) {
+    const formData = new FormData();
+    formData.append('file', audioBlob, 'voice_message.m4a');
+    
+    // We don't use apiFetch here because we need to let the browser set the Content-Type for FormData (with boundary)
+    const headers: HeadersInit = {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+    
+    const response = await fetch(`${BASE_URL}/emergencies/${emergencyId}/messages/voice`, {
+        method: 'POST',
+        headers,
+        body: formData,
+    });
+    
+    const data = await response.json();
+    if (!response.ok) {
+        const error: any = new Error(data.message || data.detail || 'Erreur serveur');
+        error.status = response.status;
+        throw error;
+    }
+    return data;
+}
+
+export function getVoiceMessageUrl(emergencyId: string, fileId: string, token: string) {
+    // Return a URL that can be used in an <audio> tag. Since it needs auth, we could pass token in query param if supported by backend, or just use the backend endpoint if it's cookie-based.
+    // However, our backend expects the token in the header. To play audio in an <audio> tag with a Bearer token, we need to fetch the blob.
+    // Let's create a helper for fetching the audio blob URL.
+    return `${BASE_URL}/emergencies/${emergencyId}/messages/voice/${fileId}`;
+}
+
+export async function fetchAudioBlobUrl(emergencyId: string, fileId: string, token: string): Promise<string> {
+    const response = await fetch(`${BASE_URL}/emergencies/${emergencyId}/messages/voice/${fileId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!response.ok) throw new Error('Audio load failed');
+    const blob = await response.blob();
+    return URL.createObjectURL(blob);
+
+}
+
 // ── Company ───────────────────────────────────────────────────────────────────
 export async function getCompanyApi(id: string, token: string) {
     return apiFetch(`/companies/${id}`, {}, token);
+}
+
+export async function updateCompanyInfoApi(id: string, data: any, token: string) {
+    return apiFetch(`/companies/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+    }, token);
 }
 
 // ── SSE ───────────────────────────────────────────────────────────────────────

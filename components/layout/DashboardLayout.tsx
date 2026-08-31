@@ -66,7 +66,7 @@ function FlashOverlay() {
 }
 
 function SSEInitializer() {
-  const { startEmergency, resolveEmergency, resolveEmergencyById, addWorker, addToast, updateEmergencyFields } = useEmergency();
+  const { startEmergency, resolveEmergency, resolveEmergencyById, dispatchResolvedEmergency, addWorker, addToast, updateEmergencyFields, updateWorkerLocation } = useEmergency();
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
 
@@ -81,23 +81,23 @@ function SSEInitializer() {
     token,
     (type, data: any) => {
       console.log('SSE Event received:', type, data);
-      if (type === 'EMERGENCY_STARTED') {
-        const emergencyData = data.emergency;
+      if (type === 'EMERGENCY_STARTED' || type === 'emergency_started') {
+        const emergencyData = data.emergency || data;
         const userData = data.user;
         const mappedEmergency = {
           id: emergencyData.id,
           workerId: emergencyData.user_id || 'unknown',
           type: emergencyData.type,
-          severity: emergencyData.severity.toLowerCase(),
+          severity: emergencyData.severity ? emergencyData.severity.toLowerCase() : 'critical',
           gpsCoordinates: (emergencyData.latitude !== undefined && emergencyData.longitude !== undefined && emergencyData.latitude !== null && emergencyData.longitude !== null) 
-            ? { lat: emergencyData.latitude, lng: emergencyData.longitude } 
+            ? { lat: Number(emergencyData.latitude), lng: Number(emergencyData.longitude) } 
             : undefined,
           location: emergencyData.location_description || 'Unknown location',
           status: emergencyData.status,
           startedAt: emergencyData.started_at,
           resolvedAt: emergencyData.resolved_at,
           workerName: userData ? userData.full_name : 'Unknown Worker',
-          workerPhone: userData?.phone || undefined,  // NEW: capture phone for direct call
+          workerPhone: userData?.phone || undefined,
           workerBadge: userData?.employee_id || '',
           unit: userData?.unit || 'Non assignée',
           companyId: emergencyData.company_id || '',
@@ -117,19 +117,37 @@ function SSEInitializer() {
           } : undefined
         };
         startEmergency(mappedEmergency as any);
-      } else if (type === 'EMERGENCY_RESOLVED') {
-        // Use id-based resolve to avoid the race condition where the modal button
-        // already removed this emergency and would otherwise remove the next one.
-        const resolvedId = data?.emergency?.id;
-        if (resolvedId) {
-          resolveEmergencyById(resolvedId);
-        } else {
-          resolveEmergency(); // fallback (should not happen)
+      } else if (type === 'EMERGENCY_RESOLVED' || type === 'emergency_resolved') {
+        const emergencyData = data.emergency || data;
+        const userData = data.user;
+        const mappedEmergency = {
+          id: emergencyData.id,
+          workerId: emergencyData.user_id || 'unknown',
+          type: emergencyData.type,
+          severity: emergencyData.severity ? emergencyData.severity.toLowerCase() : 'critical',
+          gpsCoordinates: (emergencyData.latitude !== undefined && emergencyData.longitude !== undefined && emergencyData.latitude !== null && emergencyData.longitude !== null) 
+            ? { lat: Number(emergencyData.latitude), lng: Number(emergencyData.longitude) } 
+            : undefined,
+          location: emergencyData.location_description || 'Unknown location',
+          status: emergencyData.status || 'resolved',
+          startedAt: emergencyData.started_at,
+          resolvedAt: emergencyData.resolved_at || new Date().toISOString(),
+          notes: emergencyData.notes,
+          responderType: emergencyData.responder_type,
+          etaMinutes: emergencyData.eta_minutes,
+          workerName: userData ? userData.full_name : 'Unknown Worker',
+          workerBadge: userData ? (userData.employee_id || '') : '',
+          unit: userData?.unit || 'Non assigné',
+          companyId: emergencyData.company_id || '',
+        };
+        // Use id-based resolve for active modals
+        if (emergencyData.id) {
+          resolveEmergencyById(emergencyData.id);
         }
+        dispatchResolvedEmergency(mappedEmergency as any);
 
       // ── NEW: live GPS heartbeat from the worker ────────────────────────────
       } else if (type === 'HEARTBEAT_UPDATED') {
-        // data: { emergency_id, latitude, longitude, last_seen_active, not_responding }
         updateEmergencyFields(data.emergency_id, {
           heartbeatLat:    data.latitude,
           heartbeatLng:    data.longitude,
@@ -142,7 +160,6 @@ function SSEInitializer() {
       } else if (type === 'PING_SENT') {
         updateEmergencyFields(data.emergency_id, {
           pingStatus: 'sent',
-          // notResponding will flip to true after 60 s — polled by the modal
         });
 
       // ── NEW: worker acknowledged the ping ─────────────────────────────────
@@ -189,6 +206,20 @@ function SSEInitializer() {
           title: 'Nouveau travailleur',
           message: `${newWorker.firstName} ${newWorker.lastName} s'est inscrit.`
         });
+      } else if (type === 'WORKER_LOCATION_UPDATED' || type === 'UPDATE_WORKER_LOCATION' || type === 'worker_location_updated') {
+        updateWorkerLocation({
+          userId:      data.user_id || data.userId || data.worker_id || data.workerId || '',
+          lat:         Number(data.lat ?? data.latitude ?? 0),
+          lng:         Number(data.lng ?? data.longitude ?? 0),
+          status:      (data.status as any) || 'active',
+          fullName:    data.full_name || data.fullName || data.worker_name || data.workerName || 'Travailleur',
+          employeeId:  data.employee_id || data.employeeId || '',
+          updatedAt:   data.updated_at || data.updatedAt || data.last_updated || new Date().toISOString(),
+        });
+      } else if (type === 'NEW_MESSAGE' || type === 'new_message') {
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('sos_new_message', { detail: data }));
+        }
       }
     }
   );

@@ -1,19 +1,54 @@
 'use client';
-import { useState } from 'react';
-import { Building2, Bell, Users, Shield, Save } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Building2, Bell, Users, Shield, Save, PhoneCall } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { COMPANIES, SAFETY_OFFICERS } from '@/lib/mock-data';
+import { SAFETY_OFFICERS } from '@/lib/mock-data';
+import { getAuth } from '@/lib/auth';
+import { getCompanyApi, updateCompanyInfoApi } from '@/lib/api';
 
 export default function SettingsPage() {
-  const company = COMPANIES[0];
-  const [companyForm, setCompanyForm] = useState({ name: company.name, industry: company.industry, address: company.address });
+  const [company, setCompany] = useState<any>(null);
+  const [companyForm, setCompanyForm] = useState({ name: '', industry: '', contact_email: '', sos_hotline_phone: '' });
   const [notifs, setNotifs] = useState({ sound: true, email: true, browser: true });
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const handleSave = () => {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  useEffect(() => {
+    async function loadCompany() {
+      const user = getAuth();
+      if (!user?.token) return;
+      try {
+        const res = await getCompanyApi(user.companyId, user.token);
+        setCompany(res.data);
+        setCompanyForm({
+          name: res.data.name || '',
+          industry: res.data.industry || '',
+          contact_email: res.data.contact_email || '',
+          sos_hotline_phone: res.data.sos_hotline_phone || '',
+        });
+      } catch (err) {
+        console.error('Failed to load company', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadCompany();
+  }, []);
+
+  const handleSave = async () => {
+    const user = getAuth();
+    if (!user?.token || !company) return;
+    try {
+      await updateCompanyInfoApi(company.id, companyForm, user.token);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (err) {
+      console.error('Failed to update company', err);
+    }
   };
+
+  if (loading) return <DashboardLayout><div className="p-8">Chargement...</div></DashboardLayout>;
+  if (!company) return <DashboardLayout><div className="p-8 text-red-500">Erreur de chargement de l'entreprise.</div></DashboardLayout>;
 
   const Section = ({ icon: Icon, title, children }: { icon: React.ElementType; title: string; children: React.ReactNode }) => (
     <div className="rounded-xl overflow-hidden border" style={{ background: 'var(--sos-bg-surface)', borderColor: 'var(--sos-border)', boxShadow: 'var(--sos-shadow)' }}>
@@ -65,8 +100,21 @@ export default function SettingsPage() {
           <div className="flex flex-col gap-4">
             <Field label="Nom de l'entreprise" value={companyForm.name} onChange={v => setCompanyForm(f => ({ ...f, name: v }))} />
             <Field label="Secteur d'activité" value={companyForm.industry} onChange={v => setCompanyForm(f => ({ ...f, industry: v }))} />
-            <Field label="Adresse" value={companyForm.address} onChange={v => setCompanyForm(f => ({ ...f, address: v }))} />
-            <Field label="Code entreprise" value={company.code} disabled />
+            <Field label="Email de contact" value={companyForm.contact_email} onChange={v => setCompanyForm(f => ({ ...f, contact_email: v }))} />
+            <Field label="Code entreprise" value={company.company_code} disabled />
+          </div>
+        </Section>
+
+        <Section icon={PhoneCall} title="Numéro d'Urgence (Fallback)">
+          <div className="flex flex-col gap-4">
+            <p className="text-xs text-gray-500">
+              Ce numéro sera utilisé par le système comme solution de repli si aucun officier de sécurité n'est en service pour répondre à un appel d'urgence.
+            </p>
+            <Field 
+              label="Numéro de la permanence (Ex: +213...)" 
+              value={companyForm.sos_hotline_phone} 
+              onChange={v => setCompanyForm(f => ({ ...f, sos_hotline_phone: v }))} 
+            />
           </div>
         </Section>
 
@@ -83,16 +131,16 @@ export default function SettingsPage() {
             <div className="flex items-end justify-between mb-3">
               <div>
                 <div className="text-3xl font-black" style={{ color: '#4CAF50' }}>
-                  {company.currentWorkers}<span className="text-xl font-normal" style={{ color: 'var(--sos-text-secondary)' }}>/{company.maxWorkers}</span>
+                  {company.current_users}<span className="text-xl font-normal" style={{ color: 'var(--sos-text-secondary)' }}>/{company.max_users}</span>
                 </div>
                 <div className="text-sm mt-1" style={{ color: 'var(--sos-text-muted)' }}>travailleurs enregistrés</div>
               </div>
               <div className="text-right">
-                <div className="text-sm" style={{ color: 'var(--sos-text-muted)' }}>{company.maxWorkers - company.currentWorkers} postes disponibles</div>
+                <div className="text-sm" style={{ color: 'var(--sos-text-muted)' }}>{company.max_users - company.current_users} postes disponibles</div>
               </div>
             </div>
             <div className="w-full h-3 rounded-full overflow-hidden" style={{ background: 'var(--sos-bg-hover)' }}>
-              <div className="h-full rounded-full transition-all" style={{ width: `${(company.currentWorkers / company.maxWorkers) * 100}%`, background: 'linear-gradient(90deg, #4CAF50, #E53935)' }} />
+              <div className="h-full rounded-full transition-all" style={{ width: `${(company.current_users / company.max_users) * 100}%`, background: 'linear-gradient(90deg, #4CAF50, #E53935)' }} />
             </div>
             <p className="text-xs mt-3 p-3 rounded-lg border" style={{ background: 'var(--sos-bg-surface-2)', borderColor: 'var(--sos-border)', color: 'var(--sos-text-secondary)' }}>
               Pour augmenter votre limite, contactez notre équipe commerciale: <span style={{ color: '#E53935' }}>commercial@sos-algerie.dz</span>
