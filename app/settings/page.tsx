@@ -95,7 +95,7 @@ export default function SettingsPage() {
               <div className="h-full rounded-full transition-all" style={{ width: `${(company.currentWorkers / company.maxWorkers) * 100}%`, background: 'linear-gradient(90deg, #4CAF50, #E53935)' }} />
             </div>
             <p className="text-xs mt-3 p-3 rounded-lg border" style={{ background: 'var(--sos-bg-surface-2)', borderColor: 'var(--sos-border)', color: 'var(--sos-text-secondary)' }}>
-              Pour augmenter votre limite, contactez notre équipe commerciale: <span style={{ color: '#E53935' }}>commercial@sos-algerie.dz</span>
+              Pour augmenter votre limite, contactez notre équipe commerciale: <span style={{ color: '#E53935' }}>commercial@echoalert.dz</span>
             </p>
           </div>
         </Section>

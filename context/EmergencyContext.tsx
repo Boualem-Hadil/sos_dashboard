@@ -240,7 +240,7 @@ export function EmergencyProvider({ children }: { children: React.ReactNode }) {
         if (auth?.role === 'super_admin') {
           dispatch({
             type: 'SET_INITIAL_DATA',
-            payload: { workers: [], emergencies: [], company: { name: 'SOS Algérie Platform' } },
+            payload: { workers: [], emergencies: [], company: { name: 'EchoAlert Platform' } },
           });
           return;
         }
@@ -254,12 +254,44 @@ export function EmergencyProvider({ children }: { children: React.ReactNode }) {
         ]);
 
         const companyData = Array.isArray(fetchedCompanies) ? fetchedCompanies[0] : fetchedCompanies;
+        const workers = fetchedWorkers || [];
+        
+        // Map backend snake_case to frontend camelCase expected by Dashboard
+        const mappedEmergencies = (fetchedEmergencies || []).map((e: any) => {
+          const worker = workers.find((w: any) => w.id === e.user_id);
+          return {
+            id: e.id,
+            workerId: e.user_id || 'unknown',
+            type: e.type,
+            severity: e.severity?.toLowerCase() || 'minor',
+            gpsCoordinates: (e.latitude !== undefined && e.longitude !== undefined && e.latitude !== null && e.longitude !== null)
+              ? { lat: e.latitude, lng: e.longitude }
+              : undefined,
+            location: e.location_description || 'Unknown location',
+            status: e.status,
+            startedAt: e.started_at,
+            resolvedAt: e.resolved_at,
+            voiceTranscript: e.voice_transcript || undefined,
+            workerName: worker ? `${worker.firstName} ${worker.lastName}`.trim() : 'Unknown Worker',
+            workerBadge: worker?.employeeId || '',
+            unit: worker?.unit || 'Non assignée',
+            companyId: e.company_id || '',
+            responderType: e.responder_type,
+            etaMinutes: e.eta_minutes,
+            notes: e.notes,
+            lastSeenActive: e.last_seen_active,
+            pingStatus: e.not_responding ? 'expired' : (e.ping_acked_at ? 'acked' : (e.ping_sent_at ? 'sent' : 'none')),
+            notResponding: e.not_responding ?? false,
+            heartbeatLat: e.heartbeat_lat,
+            heartbeatLng: e.heartbeat_lng,
+          };
+        });
 
         dispatch({
           type: 'SET_INITIAL_DATA',
           payload: {
-            workers: fetchedWorkers || [],
-            emergencies: fetchedEmergencies || [],
+            workers: workers,
+            emergencies: mappedEmergencies,
             company: companyData,
           }
         });

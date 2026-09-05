@@ -89,13 +89,14 @@ function SSEInitializer() {
           workerId: emergencyData.user_id || 'unknown',
           type: emergencyData.type,
           severity: emergencyData.severity.toLowerCase(),
-          gpsCoordinates: (emergencyData.latitude !== undefined && emergencyData.longitude !== undefined && emergencyData.latitude !== null && emergencyData.longitude !== null) 
-            ? { lat: emergencyData.latitude, lng: emergencyData.longitude } 
+          gpsCoordinates: (emergencyData.latitude !== undefined && emergencyData.longitude !== undefined && emergencyData.latitude !== null && emergencyData.longitude !== null)
+            ? { lat: emergencyData.latitude, lng: emergencyData.longitude }
             : undefined,
           location: emergencyData.location_description || 'Unknown location',
           status: emergencyData.status,
           startedAt: emergencyData.started_at,
           resolvedAt: emergencyData.resolved_at,
+          voiceTranscript: emergencyData.voice_transcript || undefined,
           workerName: userData ? userData.full_name : 'Unknown Worker',
           workerPhone: userData?.phone || undefined,  // NEW: capture phone for direct call
           workerBadge: userData?.employee_id || '',
@@ -127,33 +128,33 @@ function SSEInitializer() {
           resolveEmergency(); // fallback (should not happen)
         }
 
-      // ── NEW: live GPS heartbeat from the worker ────────────────────────────
+        // ── NEW: live GPS heartbeat from the worker ────────────────────────────
       } else if (type === 'HEARTBEAT_UPDATED') {
         // data: { emergency_id, latitude, longitude, last_seen_active, not_responding }
         updateEmergencyFields(data.emergency_id, {
-          heartbeatLat:    data.latitude,
-          heartbeatLng:    data.longitude,
-          lastSeenActive:  data.last_seen_active,
-          notResponding:   data.not_responding ?? false,
-          gpsCoordinates:  { lat: data.latitude, lng: data.longitude },
+          heartbeatLat: data.latitude,
+          heartbeatLng: data.longitude,
+          lastSeenActive: data.last_seen_active,
+          notResponding: data.not_responding ?? false,
+          gpsCoordinates: { lat: data.latitude, lng: data.longitude },
         });
 
-      // ── NEW: officer sent an "are you OK?" ping ───────────────────────────
+        // ── NEW: officer sent an "are you OK?" ping ───────────────────────────
       } else if (type === 'PING_SENT') {
         updateEmergencyFields(data.emergency_id, {
           pingStatus: 'sent',
           // notResponding will flip to true after 60 s — polled by the modal
         });
 
-      // ── NEW: worker acknowledged the ping ─────────────────────────────────
+        // ── NEW: worker acknowledged the ping ─────────────────────────────────
       } else if (type === 'PING_ACKED') {
         updateEmergencyFields(data.emergency_id, {
-          pingStatus:    'acked',
+          pingStatus: 'acked',
           notResponding: false,
         });
         addToast({
-          type:    'success',
-          title:   '✅ Travailleur répond',
+          type: 'success',
+          title: '✅ Travailleur répond',
           message: 'Le travailleur a confirmé qu\'il va bien.',
         });
 

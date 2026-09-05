@@ -799,7 +799,7 @@ export default function AdminPage() {
           </div>
           <div>
             <div className="font-bold text-sm" style={{ color: 'var(--sos-text-primary)' }}>Super Admin Panel</div>
-            <div className="text-xs" style={{ color: 'var(--sos-text-muted)' }}>SOS Algérie Platform</div>
+            <div className="text-xs" style={{ color: 'var(--sos-text-muted)' }}>EchoAlert Platform</div>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -849,7 +849,7 @@ export default function AdminPage() {
             <div className="flex flex-col gap-6">
               <div>
                 <h1 className="text-2xl font-black" style={{ color: 'var(--sos-text-primary)' }}>Vue d'ensemble</h1>
-                <p className="text-sm mt-1" style={{ color: 'var(--sos-text-secondary)' }}>Statistiques globales de la plateforme SOS Algérie</p>
+                <p className="text-sm mt-1" style={{ color: 'var(--sos-text-secondary)' }}>Statistiques globales de la plateforme EchoAlert</p>
               </div>
               {stats ? <StatsGrid stats={stats} /> : (
                 <div className="grid grid-cols-3 gap-4">

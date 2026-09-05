@@ -1,9 +1,9 @@
 'use client';
-import { Users, Zap, AlertTriangle, Calendar } from 'lucide-react';
+import { Users, Zap, Calendar } from 'lucide-react';
 import { useEmergency } from '@/context/EmergencyContext';
 
 export function StatsCards() {
-  const { workers, liveCount, emergencyHistory, company, isLoading } = useEmergency();
+  const { workers, emergencyHistory, company, isLoading } = useEmergency();
 
   if (isLoading || !company) return null;
 
@@ -55,7 +55,6 @@ export function StatsCards() {
             background: 'var(--sos-bg-surface)',
             border: `1px solid ${c.border}`,
             boxShadow: 'var(--sos-shadow)',
-            animation: c.pulse ? 'emergency-pulse 1.5s ease-in-out infinite' : undefined,
           }}
         >
           <div className="flex items-center justify-between">

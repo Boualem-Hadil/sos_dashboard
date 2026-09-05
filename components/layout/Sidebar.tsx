@@ -104,7 +104,7 @@ export function Sidebar() {
 
       {/* Footer */}
       <div className="px-5 py-4" style={{ borderTop: '1px solid var(--sos-sidebar-border)' }}>
-        <div className="text-xs" style={{ color: 'var(--sos-sidebar-text)', opacity: 0.7 }}>SOS Algérie v2.0</div>
+        <div className="text-xs" style={{ color: 'var(--sos-sidebar-text)', opacity: 0.7 }}>EchoAlert v2.0</div>
         <div className="text-xs" style={{ color: 'var(--sos-sidebar-text)', opacity: 0.4 }}>© 2025 Tous droits réservés</div>
       </div>
     </aside>

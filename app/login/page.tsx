@@ -46,7 +46,7 @@ export default function LoginPage() {
             <div className="w-20 h-20 rounded-2xl flex items-center justify-center mb-4 shadow-lg" style={{ background: 'linear-gradient(135deg, #E53935, #B71C1C)', boxShadow: '0 8px 30px rgba(229,57,53,0.3)' }}>
               <ShieldAlert className="w-10 h-10 text-white" />
             </div>
-            <h1 className="text-3xl font-black tracking-tight" style={{ color: '#E53935' }}>SOS Algérie</h1>
+            <h1 className="text-3xl font-black tracking-tight" style={{ color: '#E53935' }}>EchoAlert</h1>
             <p className="text-sm mt-1" style={{ color: 'var(--sos-text-secondary)' }}>Plateforme de sécurité surveillance</p>
           </div>
 

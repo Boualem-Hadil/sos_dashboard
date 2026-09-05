@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://192.168.1.64:8000';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://192.168.1.67:8000';
 
 // ── Generic fetch helper ──────────────────────────────────────────────────────
 async function apiFetch(
@@ -21,7 +21,7 @@ async function apiFetch(
     const data = await response.json();
 
     if (!response.ok) {
-        const errorDetail = data.detail 
+        const errorDetail = data.detail
             ? (typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail))
             : (data.message || 'Erreur serveur');
         const error: any = new Error(errorDetail);

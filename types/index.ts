@@ -1,5 +1,5 @@
 // ============================================================
-// Types & Interfaces for SOS Algérie Dashboard
+// Types & Interfaces for EchoAlert Dashboard
 // ============================================================
 
 export type EmergencyType = 'cardiac' | 'trauma' | 'fire' | 'respiratory' | 'neurological' | 'poisoning';
@@ -70,6 +70,7 @@ export interface Emergency {
   duration?: number; // minutes
   respondedBy?: string;
   notes?: string;
+  voiceTranscript?: string;
   companyId: string;
   medicalProfile?: MedicalProfile;
   // Resolution fields

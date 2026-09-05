@@ -21,9 +21,9 @@ const STA_COLORS: Record<string, string> = { resolved: '#4CAF50', false_alarm: '
 // NEW: responder type labels
 const RESPONDER_LABELS: Record<ResponderType, string> = {
   police: '🚔 Police',
-  samu:   '🚑 SAMU',
-  fire:   '🚒 Pompiers',
-  other:  '👥 Autre',
+  samu: '🚑 SAMU',
+  fire: '🚒 Pompiers',
+  other: '👥 Autre',
 };
 
 // NEW: small inline form shown when officer clicks "Résoudre"
@@ -37,10 +37,10 @@ function ResolveModal({
   onSubmit: (responderType: ResponderType, etaMinutes?: number, notes?: string) => Promise<void>;
 }) {
   const [responderType, setResponderType] = useState<ResponderType>('samu');
-  const [etaMinutes, setEtaMinutes]       = useState('');
-  const [notes, setNotes]                 = useState('');
-  const [submitting, setSubmitting]        = useState(false);
-  const [error, setError]                 = useState<string | null>(null);
+  const [etaMinutes, setEtaMinutes] = useState('');
+  const [notes, setNotes] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,9 +90,9 @@ function ResolveModal({
                   onClick={() => setResponderType(rt)}
                   className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left border"
                   style={{
-                    background:   responderType === rt ? 'rgba(76,175,80,0.15)' : 'var(--sos-bg-surface-2)',
-                    borderColor:  responderType === rt ? '#4CAF50' : 'var(--sos-border)',
-                    color:        responderType === rt ? '#4CAF50'  : 'var(--sos-text-secondary)',
+                    background: responderType === rt ? 'rgba(76,175,80,0.15)' : 'var(--sos-bg-surface-2)',
+                    borderColor: responderType === rt ? '#4CAF50' : 'var(--sos-border)',
+                    color: responderType === rt ? '#4CAF50' : 'var(--sos-text-secondary)',
                   }}>
                   {RESPONDER_LABELS[rt]}
                 </button>
@@ -179,6 +179,14 @@ function EmergencyModal({ emergency, onClose, onResolve }: { emergency: Emergenc
               </div>
             ))}
           </div>
+          {emergency.voiceTranscript && (
+            <div className="p-4 rounded-xl border" style={{ background: 'var(--sos-bg-surface-2)', borderColor: 'var(--sos-border)' }}>
+              <div className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--sos-text-muted)' }}>Déclaration vocale</div>
+              <div className="text-sm italic" style={{ color: 'var(--sos-text-primary)' }}>
+                « {emergency.voiceTranscript} »
+              </div>
+            </div>
+          )}
           {/* Timeline */}
           <div className="p-4 rounded-xl border" style={{ background: 'var(--sos-bg-surface-2)', borderColor: 'var(--sos-border)' }}>
             <div className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--sos-text-muted)' }}>Chronologie</div>
@@ -232,7 +240,7 @@ function EmergencyModal({ emergency, onClose, onResolve }: { emergency: Emergenc
 export default function EmergenciesPage() {
   const { emergencyHistory, authError, resolveEmergencyWithData } = useEmergency(); // CHANGED: added resolveEmergencyWithData
   const [filters, setFilters] = useState({ type: '', severity: '', status: '', worker: '' });
-  const [selected, setSelected]           = useState<Emergency | null>(null);
+  const [selected, setSelected] = useState<Emergency | null>(null);
   const [resolvingEmergency, setResolvingEmergency] = useState<Emergency | null>(null); // NEW
 
   if (authError) {
@@ -263,7 +271,7 @@ export default function EmergenciesPage() {
       'Localisation': e.location,
       'Durée (min)': e.duration ?? '',
       'Statut': getStatusLabel(e.status),
-    })), 'urgences_sos_algerie');
+    })), 'urgences_echoalert');
   };
 
   const sel = (k: string, v: string) => setFilters(f => ({ ...f, [k]: f[k as keyof typeof f] === v ? '' : v }));
@@ -302,26 +310,26 @@ export default function EmergenciesPage() {
             onChange={e => setFilters(f => ({ ...f, worker: e.target.value }))}
             className="px-4 py-2.5 rounded-xl text-sm outline-none flex-1 transition-all"
             style={{ background: 'var(--sos-bg-surface)', border: '1px solid var(--sos-border)', color: 'var(--sos-text-primary)', minWidth: 180 }} />
-          {(['cardiac','trauma','fire','respiratory','neurological','poisoning'] as const).map(t => (
+          {(['cardiac', 'trauma', 'fire', 'respiratory', 'neurological', 'poisoning'] as const).map(t => (
             <button key={t} onClick={() => sel('type', t)}
               className="px-3 py-2 rounded-lg text-xs font-medium transition-all"
-              style={{ 
-                background: filters.type === t ? 'rgba(229,57,53,0.15)' : 'var(--sos-bg-surface)', 
-                border: `1px solid ${filters.type === t ? '#E53935' : 'var(--sos-border)'}`, 
-                color: filters.type === t ? '#E53935' : 'var(--sos-text-secondary)' 
+              style={{
+                background: filters.type === t ? 'rgba(229,57,53,0.15)' : 'var(--sos-bg-surface)',
+                border: `1px solid ${filters.type === t ? '#E53935' : 'var(--sos-border)'}`,
+                color: filters.type === t ? '#E53935' : 'var(--sos-text-secondary)'
               }}>
               {getEmergencyTypeLabel(t)}
             </button>
           ))}
-          {['critical','moderate','minor'].map(s => (
+          {['critical', 'moderate', 'minor'].map(s => (
             <button key={s} onClick={() => sel('severity', s)}
               className="px-3 py-2 rounded-lg text-xs font-medium transition-all"
-              style={{ 
-                background: filters.severity === s ? `${SEV_COLORS[s]}22` : 'var(--sos-bg-surface)', 
-                border: `1px solid ${filters.severity === s ? SEV_COLORS[s] : 'var(--sos-border)'}`, 
-                color: filters.severity === s ? SEV_COLORS[s] : 'var(--sos-text-secondary)' 
+              style={{
+                background: filters.severity === s ? `${SEV_COLORS[s]}22` : 'var(--sos-bg-surface)',
+                border: `1px solid ${filters.severity === s ? SEV_COLORS[s] : 'var(--sos-border)'}`,
+                color: filters.severity === s ? SEV_COLORS[s] : 'var(--sos-text-secondary)'
               }}>
-              {getSeverityLabel(s as 'critical'|'moderate'|'minor')}
+              {getSeverityLabel(s as 'critical' | 'moderate' | 'minor')}
             </button>
           ))}
         </div>
@@ -331,23 +339,23 @@ export default function EmergenciesPage() {
           <table className="w-full text-sm">
             <thead>
               <tr style={{ borderBottom: '1px solid var(--sos-border)' }}>
-                {['Date/Heure','Travailleur','Type','Sévérité','Localisation','Durée','Statut','Actions'].map(h => (
+                {['Date/Heure', 'Travailleur', 'Type', 'Sévérité', 'Localisation', 'Durée', 'Statut', 'Actions'].map(h => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--sos-text-muted)' }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {filtered.map((e, i) => (
-                <tr key={e.id} style={{ borderBottom: i < filtered.length-1 ? '1px solid var(--sos-border-subtle)' : undefined, cursor:'pointer' }}
+                <tr key={e.id} style={{ borderBottom: i < filtered.length - 1 ? '1px solid var(--sos-border-subtle)' : undefined, cursor: 'pointer' }}
                   className="hover:bg-[var(--sos-bg-hover)] transition-colors" onClick={() => setSelected(e)}>
-                  <td className="px-4 py-3 text-xs font-mono" style={{ color:'var(--sos-text-secondary)' }}>{formatDateTime(e.startedAt)}</td>
+                  <td className="px-4 py-3 text-xs font-mono" style={{ color: 'var(--sos-text-secondary)' }}>{formatDateTime(e.startedAt)}</td>
                   <td className="px-4 py-3 font-medium" style={{ color: 'var(--sos-text-primary)' }}>{e.workerName}</td>
-                  <td className="px-4 py-3"><div className="flex items-center gap-1.5">{TYPE_ICONS[e.type]}<span style={{ color:'var(--sos-text-secondary)' }}>{getEmergencyTypeLabel(e.type)}</span></div></td>
-                  <td className="px-4 py-3"><span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background:`${SEV_COLORS[e.severity]}22`, color:SEV_COLORS[e.severity] }}>{getSeverityLabel(e.severity)}</span></td>
-                  <td className="px-4 py-3 text-xs" style={{ color:'var(--sos-text-secondary)' }}>{e.location}</td>
-                  <td className="px-4 py-3 text-xs" style={{ color:'var(--sos-text-secondary)' }}>{e.duration ? formatDuration(e.duration) : '—'}</td>
-                  <td className="px-4 py-3"><span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background:`${STA_COLORS[e.status]}22`, color:STA_COLORS[e.status] }}>{getStatusLabel(e.status)}</span></td>
-                  <td className="px-4 py-3"><button className="text-xs px-3 py-1.5 rounded-lg transition-colors hover:bg-[var(--sos-bg-hover)]" style={{ background:'var(--sos-bg-surface-2)', color:'var(--sos-text-secondary)', border:'1px solid var(--sos-border)' }} onClick={ev=>{ev.stopPropagation();setSelected(e);}}>Voir</button></td>
+                  <td className="px-4 py-3"><div className="flex items-center gap-1.5">{TYPE_ICONS[e.type]}<span style={{ color: 'var(--sos-text-secondary)' }}>{getEmergencyTypeLabel(e.type)}</span></div></td>
+                  <td className="px-4 py-3"><span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background: `${SEV_COLORS[e.severity]}22`, color: SEV_COLORS[e.severity] }}>{getSeverityLabel(e.severity)}</span></td>
+                  <td className="px-4 py-3 text-xs" style={{ color: 'var(--sos-text-secondary)' }}>{e.location}</td>
+                  <td className="px-4 py-3 text-xs" style={{ color: 'var(--sos-text-secondary)' }}>{e.duration ? formatDuration(e.duration) : '—'}</td>
+                  <td className="px-4 py-3"><span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background: `${STA_COLORS[e.status]}22`, color: STA_COLORS[e.status] }}>{getStatusLabel(e.status)}</span></td>
+                  <td className="px-4 py-3"><button className="text-xs px-3 py-1.5 rounded-lg transition-colors hover:bg-[var(--sos-bg-hover)]" style={{ background: 'var(--sos-bg-surface-2)', color: 'var(--sos-text-secondary)', border: '1px solid var(--sos-border)' }} onClick={ev => { ev.stopPropagation(); setSelected(e); }}>Voir</button></td>
                 </tr>
               ))}
             </tbody>
