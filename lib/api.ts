@@ -71,13 +71,6 @@ export async function getMeApi(token: string) {
     return apiFetch('/auth/me', {}, token);
 }
 
-export async function updateDutyApi(isOnDuty: boolean, token: string) {
-    return apiFetch('/users/duty', {
-        method: 'PUT',
-        body: JSON.stringify({ is_on_duty: isOnDuty }),
-    }, token);
-}
-
 // ── Workers ───────────────────────────────────────────────────────────────────
 export async function getWorkersApi(token: string) {
     return apiFetch('/users', {}, token);
