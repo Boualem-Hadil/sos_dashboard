@@ -53,6 +53,19 @@ export interface Worker {
   gpsLocation?: { lat: number; lng: number };
 }
 
+/** Live position snapshot broadcast by the backend on WORKER_LOCATION_UPDATED. */
+export interface WorkerLocation {
+  userId: string;
+  lat: number;
+  lng: number;
+  /** "active" | "emergency" — derived server-side from active emergencies */
+  status: WorkerStatus;
+  fullName: string;
+  employeeId: string;
+  /** ISO timestamp of last received update */
+  updatedAt: string;
+}
+
 export interface Emergency {
   id: string;
   workerId: string;

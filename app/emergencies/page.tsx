@@ -7,6 +7,7 @@ import { useEmergency } from '@/context/EmergencyContext';
 import { formatDateTime, formatDuration, getEmergencyTypeLabel, getSeverityLabel, getStatusLabel, exportToCSV } from '@/lib/utils';
 import type { Emergency, EmergencyType, ResponderType } from '@/types';
 
+
 const TYPE_ICONS: Record<EmergencyType, React.ReactNode> = {
   cardiac: <Heart className="w-4 h-4" style={{ color: '#E53935' }} />,
   trauma: <Bandage className="w-4 h-4" style={{ color: '#FF9800' }} />,

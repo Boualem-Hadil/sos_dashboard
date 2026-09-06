@@ -6,6 +6,10 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useEmergency } from '@/context/EmergencyContext';
 import { getBloodTypeColor, getInitials, getWorkerStatusLabel, formatDateTime } from '@/lib/utils';
 import type { Worker } from '@/types';
+import { getAuth } from '@/lib/auth';
+import { AddWorkerModal } from '@/components/workers/AddWorkerModal';
+import { EditWorkerModal } from '@/components/workers/EditWorkerModal';
+import { EditMedicalModal } from '@/components/workers/EditMedicalModal';
 
 const STATUS_STYLES: Record<string, { color: string; bg: string; pulse?: boolean }> = {
   active: { color: '#4CAF50', bg: 'rgba(76,175,80,0.15)' },
@@ -15,9 +19,25 @@ const STATUS_STYLES: Record<string, { color: string; bg: string; pulse?: boolean
 
 import { getEmergencies } from '@/lib/data-service';
 
-function WorkerSidePanel({ worker, onClose }: { worker: Worker; onClose: () => void }) {
+function WorkerSidePanel({ 
+  worker, 
+  onClose,
+  onEditProfile,
+  onEditMedical,
+  onDelete
+}: { 
+  worker: Worker; 
+  onClose: () => void;
+  onEditProfile: () => void;
+  onEditMedical: () => void;
+  onDelete: () => void;
+}) {
   const [history, setHistory] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
+  
+  // Only admins and officers can edit/delete
+  const auth = getAuth();
+  const canManage = auth?.role === 'super_admin' || auth?.role === 'company_admin' || auth?.role === 'safety_officer';
 
   React.useEffect(() => {
     let mounted = true;
@@ -68,6 +88,26 @@ function WorkerSidePanel({ worker, onClose }: { worker: Worker; onClose: () => v
           </div>
         </div>
 
+        {/* Action Buttons (Admin/Officer only) */}
+        {canManage && (
+          <div className="flex gap-2 mb-5">
+            <button 
+              onClick={onEditProfile}
+              className="flex-1 py-2 text-xs font-bold rounded-lg border flex items-center justify-center gap-2 hover:bg-white/5 transition-colors"
+              style={{ borderColor: 'var(--sos-border)', color: 'var(--sos-text-primary)' }}
+            >
+              Modifier Profil
+            </button>
+            <button 
+              onClick={onDelete}
+              className="flex-1 py-2 text-xs font-bold rounded-lg border flex items-center justify-center gap-2 hover:opacity-80 transition-opacity"
+              style={{ borderColor: '#E5393540', color: '#EF5350', background: 'rgba(229,57,53,0.1)' }}
+            >
+              Désactiver
+            </button>
+          </div>
+        )}
+
         {/* Info */}
         <div className="flex flex-col gap-3 mb-5">
           {[
@@ -86,8 +126,19 @@ function WorkerSidePanel({ worker, onClose }: { worker: Worker; onClose: () => v
         </div>
 
         {/* Medical */}
-        <div className="p-4 rounded-xl border" style={{ background: 'var(--sos-bg-surface-2)', borderColor: 'var(--sos-border)' }}>
-          <div className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--sos-text-muted)' }}>Profil Médical</div>
+        <div className="p-4 rounded-xl border relative" style={{ background: 'var(--sos-bg-surface-2)', borderColor: 'var(--sos-border)' }}>
+          <div className="flex justify-between items-center mb-3">
+            <div className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--sos-text-muted)' }}>Profil Médical</div>
+            {canManage && (
+              <button 
+                onClick={onEditMedical}
+                className="text-xs font-bold hover:underline" 
+                style={{ color: '#2196F3' }}
+              >
+                Modifier
+              </button>
+            )}
+          </div>
           <div className="flex items-center gap-2 mb-3">
             <span className="text-xs" style={{ color: 'var(--sos-text-secondary)' }}>Groupe sanguin:</span>
             <span className="px-2 py-0.5 rounded text-xs font-black text-white" style={{ background: getBloodTypeColor(worker.medicalProfile.bloodType) }}>
@@ -170,10 +221,26 @@ function WorkerSidePanel({ worker, onClose }: { worker: Worker; onClose: () => v
 }
 
 export default function WorkersPage() {
-  const { workers, company, isLoading, authError } = useEmergency();
+  const { workers, company, isLoading, authError, deleteWorker } = useEmergency();
   const [search, setSearch] = useState('');
   const [unitFilter, setUnitFilter] = useState('');
   const [selected, setSelected] = useState<Worker | null>(null);
+
+  // Modal states
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showEditMedicalModal, setShowEditMedicalModal] = useState(false);
+
+  const handleDelete = async (worker: Worker) => {
+    if (confirm(`Êtes-vous sûr de vouloir désactiver le compte de ${worker.firstName} ${worker.lastName} ?`)) {
+      try {
+        await deleteWorker(worker.id);
+        if (selected?.id === worker.id) setSelected(null);
+      } catch (err: any) {
+        alert(err.message || 'Erreur lors de la désactivation');
+      }
+    }
+  };
 
   if (authError) {
     return <DashboardLayout><div className="flex h-full items-center justify-center text-red-500 font-bold text-2xl tracking-widest">{authError}</div></DashboardLayout>;
@@ -213,6 +280,7 @@ export default function WorkersPage() {
             }}
             disabled={company.currentWorkers >= company.maxWorkers}
             title={company.currentWorkers >= company.maxWorkers ? 'Limite atteinte. Contactez le support pour upgrade.' : ''}
+            onClick={() => setShowAddModal(true)}
           >
             <Plus className="w-4 h-4" /> Ajouter un travailleur
           </button>
@@ -292,15 +360,43 @@ export default function WorkersPage() {
         </div>
       </div>
 
-      {/* Side panel overlay */}
       <AnimatePresence>
         {selected && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 z-30" style={{ background: 'rgba(0,0,0,0.5)' }}
-              onClick={() => setSelected(null)} />
-            <WorkerSidePanel worker={selected} onClose={() => setSelected(null)} />
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 z-30 backdrop-blur-sm"
+              onClick={() => setSelected(null)}
+            />
+            <WorkerSidePanel 
+              worker={selected} 
+              onClose={() => setSelected(null)} 
+              onEditProfile={() => setShowEditModal(true)}
+              onEditMedical={() => setShowEditMedicalModal(true)}
+              onDelete={() => handleDelete(selected)}
+            />
           </>
+        )}
+
+        {showAddModal && (
+          <AddWorkerModal onClose={() => setShowAddModal(false)} />
+        )}
+
+        {showEditModal && selected && (
+          <EditWorkerModal 
+            worker={selected} 
+            onClose={() => setShowEditModal(false)} 
+            onSuccess={(updated) => setSelected(updated)}
+          />
+        )}
+
+        {showEditMedicalModal && selected && (
+          <EditMedicalModal 
+            worker={selected} 
+            onClose={() => setShowEditMedicalModal(false)} 
+          />
         )}
       </AnimatePresence>
     </DashboardLayout>

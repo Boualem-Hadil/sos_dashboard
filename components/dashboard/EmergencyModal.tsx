@@ -3,12 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useEmergency } from '@/context/EmergencyContext';
 import { resolveEmergencyApi, sendPingApi, getNearbyWorkersApi } from '@/lib/api';
 import { getToken } from '@/lib/auth';
-import {
-  PhoneCall, MapPin, AlertTriangle, HeartPulse, Volume2, VolumeX,
-  CheckCircle, ShieldAlert, Phone, Map as MapIcon, ChevronDown, ChevronUp,
-  Bell, Users, Loader2, Navigation,
-} from 'lucide-react';
+import { PhoneCall, MapPin, AlertTriangle, HeartPulse, Volume2, VolumeX, CheckCircle, ShieldAlert, Phone, Map as MapIcon, X, Bell, Users, Loader2, Navigation, ChevronDown, ChevronUp } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { EmergencyChat } from '@/components/dashboard/EmergencyChat';
 import type { NearbyWorker } from '@/types';
 
 const SOSMap = dynamic(() => import('@/components/dashboard/Map'), {
@@ -245,7 +242,8 @@ export function EmergencyModal() {
       const token = getToken();
       if (!token) throw new Error('No token');
       const res = await getNearbyWorkersApi(currentEmergency.id, token, 5);
-      setNearbyWorkers(res?.data ?? []);
+      const workersArray = Array.isArray(res) ? res : (res?.data || []);
+      setNearbyWorkers(workersArray);
     } catch (err: any) {
       setNearbyError(err?.message || 'Erreur lors de la recherche');
     } finally {
@@ -253,13 +251,13 @@ export function EmergencyModal() {
     }
   };
 
-  const { type, severity, workerName, location, medicalProfile, gpsCoordinates } = currentEmergency;
-  const apiLat = (currentEmergency as any).latitude;
-  const apiLng = (currentEmergency as any).longitude;
-  const hasCoordinates = !!gpsCoordinates || (apiLat !== undefined && apiLng !== undefined && apiLat !== null && apiLng !== null);
-  const mapCenter: [number, number] = gpsCoordinates
-    ? [gpsCoordinates.lat, gpsCoordinates.lng]
-    : hasCoordinates ? [apiLat, apiLng] : [0, 0];
+  const { type, severity, workerName, location, medicalProfile, gpsCoordinates, heartbeatLat, heartbeatLng } = currentEmergency;
+  const rawLat = gpsCoordinates?.lat ?? (currentEmergency as any).latitude ?? heartbeatLat;
+  const rawLng = gpsCoordinates?.lng ?? (currentEmergency as any).longitude ?? heartbeatLng;
+  const finalLat = Number(rawLat);
+  const finalLng = Number(rawLng);
+  const hasCoordinates = !isNaN(finalLat) && !isNaN(finalLng);
+  const mapCenter: [number, number] = hasCoordinates ? [finalLat, finalLng] : [0, 0];
 
   // Derived "not responding" — from SSE live updates or local state
   const isNotResponding = currentEmergency.notResponding === true;
@@ -380,7 +378,7 @@ export function EmergencyModal() {
                           ⚠ Travailleur ne répond pas
                         </p>
                         <p className="text-sm mt-1" style={{ color: 'var(--sos-text-primary)' }}>
-                          Le travailleur n&apos;a pas répondu au ping. Envisagez d&apos;appeler les travailleurs proches.
+                          Le travailleur n'a pas répondu au ping. Envisagez d&apos;appeler les travailleurs proches.
                         </p>
                       </div>
                       <button
@@ -551,7 +549,7 @@ export function EmergencyModal() {
                       )}
                     </div>
                   ) : (
-                    <div className="text-sm italic" style={{ color: 'var(--sos-text-muted)' }}>Aucun contact d&apos;urgence renseigné</div>
+                    <div className="text-sm italic" style={{ color: 'var(--sos-text-muted)' }}>Aucun contact d'urgence renseigné</div>
                   )}
                 </div>
               </div>
@@ -713,7 +711,7 @@ export function EmergencyModal() {
 
               {/* Resolution Form */}
               <div className="border-t pt-6" style={{ borderColor: 'var(--sos-border)' }}>
-                <h3 className="font-bold text-lg mb-4" style={{ color: 'var(--sos-text-primary)' }}>Détails de l&apos;intervention</h3>
+                <h3 className="font-bold text-lg mb-4" style={{ color: 'var(--sos-text-primary)' }}>Détails de l'intervention</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <div>
                     <label className="block text-sm mb-1" style={{ color: 'var(--sos-text-secondary)' }}>Intervenant</label>
@@ -807,9 +805,16 @@ export function EmergencyModal() {
               </div>
 
             </div>{/* end main content */}
+
+            {/* Right: chat side panel, fixed width, own scroll */}
+            <div className="w-96 flex-shrink-0 border-l overflow-hidden flex flex-col" style={{ borderColor: 'var(--sos-border)' }}>
+              <EmergencyChat emergencyId={currentEmergency.id} />
+            </div>
+
           </div>{/* end flex body */}
         </motion.div>
       </motion.div>
     </AnimatePresence>
   );
 }
+

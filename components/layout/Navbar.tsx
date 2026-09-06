@@ -6,15 +6,40 @@ import { logout, getAuth } from '@/lib/auth';
 import { useEmergency } from '@/context/EmergencyContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useState, useEffect } from 'react';
+import { getMeApi, updateDutyApi } from '@/lib/api';
 
 export function Navbar() {
   const router = useRouter();
   const { liveCount } = useEmergency();
   const { theme, toggleTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [isOnDuty, setIsOnDuty] = useState(false);
+  const [updatingDuty, setUpdatingDuty] = useState(false);
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => { 
+    setMounted(true);
+    const userAuth = getAuth();
+    if (userAuth?.token && (userAuth.role === 'safety_officer' || userAuth.role === 'company_admin')) {
+      getMeApi(userAuth.token).then(res => {
+        setIsOnDuty(res.data.is_on_duty);
+      }).catch(console.error);
+    }
+  }, []);
   const user = mounted ? getAuth() : null;
+
+  const handleToggleDuty = async () => {
+    if (!user?.token) return;
+    setUpdatingDuty(true);
+    try {
+      const newStatus = !isOnDuty;
+      await updateDutyApi(newStatus, user.token);
+      setIsOnDuty(newStatus);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setUpdatingDuty(false);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -47,6 +72,22 @@ export function Navbar() {
       </div>
 
       <div className="flex items-center gap-3">
+        {user && (user.role === 'safety_officer' || user.role === 'company_admin') && (
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg mr-2" style={{ border: '1px solid var(--sos-border)' }}>
+            <span className="text-xs font-semibold" style={{ color: isOnDuty ? '#4CAF50' : 'var(--sos-text-secondary)' }}>
+              {isOnDuty ? 'En service' : 'Hors service'}
+            </span>
+            <button 
+              onClick={handleToggleDuty} 
+              disabled={updatingDuty}
+              className="w-10 h-5 rounded-full relative transition-all"
+              style={{ background: isOnDuty ? '#4CAF50' : 'var(--sos-border)', opacity: updatingDuty ? 0.5 : 1 }}
+            >
+              <div className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all shadow-sm" style={{ left: isOnDuty ? '22px' : '2px' }} />
+            </button>
+          </div>
+        )}
+
         {/* Theme toggle */}
         <button
           onClick={toggleTheme}
