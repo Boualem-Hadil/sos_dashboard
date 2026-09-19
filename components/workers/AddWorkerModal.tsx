@@ -4,17 +4,25 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, UserPlus, Eye, EyeOff } from 'lucide-react';
 import { useEmergency } from '@/context/EmergencyContext';
 import type { AddWorkerPayload } from '@/context/EmergencyContext';
+import { getAuth } from '@/lib/auth';
 
 interface Props {
   onClose: () => void;
   onSuccess?: () => void;
 }
 
-const ROLES = [
+const ALL_ROLES = [
   { value: 'worker', label: 'Travailleur' },
   { value: 'safety_officer', label: 'Agent de sécurité' },
   { value: 'company_admin', label: 'Administrateur' },
 ];
+
+/** Returns the roles this caller is allowed to assign, based on their own role. */
+function getAllowedRoles(callerRole: string | undefined) {
+  if (callerRole === 'company_admin') return ALL_ROLES.filter(r => r.value === 'safety_officer');
+  if (callerRole === 'safety_officer') return ALL_ROLES.filter(r => r.value === 'worker');
+  return ALL_ROLES; // super_admin or fallback
+}
 
 const INPUT_STYLE = {
   background: '#0D0D0D',
@@ -40,6 +48,8 @@ const LABEL_STYLE = {
 
 export function AddWorkerModal({ onClose, onSuccess }: Props) {
   const { addWorker, addToast } = useEmergency();
+  const auth = getAuth();
+  const roles = getAllowedRoles(auth?.role);
 
   const [form, setForm] = useState<AddWorkerPayload>({
     fullName: '',
@@ -49,7 +59,7 @@ export function AddWorkerModal({ onClose, onSuccess }: Props) {
     unit: '',
     department: '',
     position: '',
-    role: 'worker',
+    role: roles[0]?.value ?? 'worker',
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -211,7 +221,7 @@ export function AddWorkerModal({ onClose, onSuccess }: Props) {
                   value={form.role}
                   onChange={set('role')}
                 >
-                  {ROLES.map(r => (
+                  {roles.map(r => (
                     <option key={r.value} value={r.value}>{r.label}</option>
                   ))}
                 </select>

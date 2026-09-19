@@ -5,6 +5,7 @@ import { X, Pencil } from 'lucide-react';
 import { useEmergency } from '@/context/EmergencyContext';
 import type { UpdateWorkerPayload } from '@/context/EmergencyContext';
 import type { Worker } from '@/types';
+import { getAuth } from '@/lib/auth';
 
 interface Props {
   worker: Worker;
@@ -12,11 +13,17 @@ interface Props {
   onSuccess?: (updated: Worker) => void;
 }
 
-const ROLES = [
+const ALL_ROLES = [
   { value: 'worker', label: 'Travailleur' },
   { value: 'safety_officer', label: 'Agent de sécurité' },
   { value: 'company_admin', label: 'Administrateur' },
 ];
+
+function getAllowedRoles(callerRole: string | undefined) {
+  if (callerRole === 'company_admin') return ALL_ROLES.filter(r => r.value === 'safety_officer');
+  if (callerRole === 'safety_officer') return ALL_ROLES.filter(r => r.value === 'worker');
+  return ALL_ROLES; // super_admin or fallback
+}
 
 const INPUT_STYLE = {
   background: '#0D0D0D',
@@ -41,6 +48,8 @@ const LABEL_STYLE = {
 
 export function EditWorkerModal({ worker, onClose, onSuccess }: Props) {
   const { updateWorker, addToast } = useEmergency();
+  const auth = getAuth();
+  const roles = getAllowedRoles(auth?.role);
 
   const [form, setForm] = useState<UpdateWorkerPayload>({
     fullName: `${worker.firstName} ${worker.lastName}`.trim(),
@@ -203,7 +212,7 @@ export function EditWorkerModal({ worker, onClose, onSuccess }: Props) {
                   onChange={set('role')}
                 >
                   <option value="">— Inchangé —</option>
-                  {ROLES.map(r => (
+                  {roles.map(r => (
                     <option key={r.value} value={r.value}>{r.label}</option>
                   ))}
                 </select>

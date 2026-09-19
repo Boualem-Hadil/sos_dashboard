@@ -10,7 +10,7 @@ import { getAuth, logout, getToken } from '@/lib/auth';
 import { useTheme } from '@/context/ThemeContext';
 import {
   getAdminStatsApi, getAdminCompaniesApi, createAdminCompanyApi, updateAdminCompanyApi,
-  getAdminOfficersApi, createAdminOfficerApi, deactivateAdminOfficerApi,
+  getAdminOfficersApi, deactivateAdminOfficerApi,
   getNotificationRecipientsApi, addNotificationRecipientApi, removeNotificationRecipientApi,
   getExpiringCompaniesApi,
 } from '@/lib/api';
@@ -284,10 +284,14 @@ function CompanyModal({ token, company, onClose, onSaved, onToast }: {
     subscription_end: company?.subscription_end?.slice(0, 10) ?? '',
     is_active: company?.is_active ?? true,
   });
+  // Admin account — only relevant in create mode
+  const [admin, setAdmin] = useState({ full_name: '', employee_id: '', password: '', phone: '' });
+  const [showAdminPass, setShowAdminPass] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
   const set = (k: string, v: any) => setForm(f => ({ ...f, [k]: v }));
+  const setA = (k: string, v: string) => setAdmin(a => ({ ...a, [k]: v }));
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -306,6 +310,15 @@ function CompanyModal({ token, company, onClose, onSaved, onToast }: {
         await updateAdminCompanyApi(company!.id, payload, token);
       } else {
         payload.company_code = form.company_code.toUpperCase();
+        // Attach admin credentials if provided (all required fields filled)
+        if (admin.full_name.trim() && admin.employee_id.trim() && admin.password.length >= 6) {
+          payload.admin = {
+            full_name: admin.full_name.trim(),
+            employee_id: admin.employee_id.trim(),
+            password: admin.password,
+            phone: admin.phone.trim() || undefined,
+          };
+        }
         await createAdminCompanyApi(payload, token);
       }
       onSaved();
@@ -361,6 +374,48 @@ function CompanyModal({ token, company, onClose, onSaved, onToast }: {
             </span>
           </label>
         )}
+
+        {/* ── Admin account (create mode only) ──────────────────────────── */}
+        {!editing && (
+          <div className="flex flex-col gap-3 rounded-xl p-4" style={{ background: 'rgba(99,102,241,0.05)', border: '1px solid rgba(99,102,241,0.2)' }}>
+            <div className="flex items-center gap-2 mb-1">
+              <Shield className="w-4 h-4" style={{ color: '#6366F1' }} />
+              <span className="text-xs font-bold uppercase tracking-wider" style={{ color: '#6366F1' }}>Compte Administrateur</span>
+              <span className="text-xs" style={{ color: 'var(--sos-text-muted)' }}>(optionnel)</span>
+            </div>
+            <Field label="Nom complet">
+              <input style={inputStyle} value={admin.full_name} onChange={e => setA('full_name', e.target.value)} placeholder="Karim Boualem" />
+            </Field>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="ID Employé">
+                <input style={inputStyle} value={admin.employee_id} onChange={e => setA('employee_id', e.target.value)} placeholder="ADM-001" />
+              </Field>
+              <Field label="Téléphone">
+                <input style={inputStyle} value={admin.phone} onChange={e => setA('phone', e.target.value)} placeholder="+213550..." />
+              </Field>
+            </div>
+            <Field label="Mot de passe (min. 6 caractères)">
+              <div className="relative">
+                <input
+                  style={inputStyle}
+                  type={showAdminPass ? 'text' : 'password'}
+                  value={admin.password}
+                  onChange={e => setA('password', e.target.value)}
+                  placeholder="••••••••"
+                />
+                <button type="button" onClick={() => setShowAdminPass(s => !s)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                  style={{ color: 'var(--sos-text-muted)' }}>
+                  {showAdminPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </Field>
+            <p className="text-xs" style={{ color: 'var(--sos-text-muted)' }}>
+              Si renseigné, un compte <strong>Admin Entreprise</strong> sera créé automatiquement avec la société.
+            </p>
+          </div>
+        )}
+
         {error && <p className="text-sm" style={{ color: '#EF4444' }}>{error}</p>}
         <div className="flex gap-2 pt-2">
           <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-xl text-sm font-semibold" style={{ background: 'var(--sos-bg-surface-2)', color: 'var(--sos-text-secondary)', border: '1px solid var(--sos-border)' }}>
@@ -381,7 +436,6 @@ function OfficersTab({ token, onToast }: { token: string; onToast: (m: string, t
   const [officers, setOfficers] = useState<Officer[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showCreate, setShowCreate] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -412,10 +466,11 @@ function OfficersTab({ token, onToast }: { token: string; onToast: (m: string, t
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-bold text-lg" style={{ color: 'var(--sos-text-primary)' }}>Agents de Sécurité ({officers.length})</h2>
-        <button onClick={() => setShowCreate(true)} className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold text-white" style={{ background: 'linear-gradient(135deg,#10B981,#059669)', boxShadow: '0 4px 14px rgba(16,185,129,0.3)' }}>
-          <UserPlus className="w-3.5 h-3.5" /> Nouvel Agent
-        </button>
+        <h2 className="font-bold text-lg" style={{ color: 'var(--sos-text-primary)' }}>Admins &amp; Agents de Sécurité ({officers.length})</h2>
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs" style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', color: '#6366F1' }}>
+          <Shield className="w-3.5 h-3.5" />
+          <span>Les agents sont créés par les Admins Entreprise</span>
+        </div>
       </div>
 
       <div className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--sos-border)' }}>
@@ -465,78 +520,7 @@ function OfficersTab({ token, onToast }: { token: string; onToast: (m: string, t
         </table>
       </div>
 
-      {showCreate && (
-        <OfficerModal
-          token={token}
-          companies={companies}
-          onClose={() => setShowCreate(false)}
-          onSaved={() => { setShowCreate(false); load(); onToast('Agent créé ✓', 'ok'); }}
-          onToast={onToast}
-        />
-      )}
     </div>
-  );
-}
-
-// ─── Officer Create Modal ─────────────────────────────────────────────────────
-
-function OfficerModal({ token, companies, onClose, onSaved, onToast }: {
-  token: string; companies: Company[];
-  onClose: () => void; onSaved: () => void;
-  onToast: (m: string, t?: 'ok' | 'err') => void;
-}) {
-  const [form, setForm] = useState({ full_name: '', employee_id: '', password: '', phone: '', company_id: companies[0]?.id ?? '' });
-  const [showPass, setShowPass] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-  const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true); setError('');
-    try {
-      await createAdminOfficerApi({ ...form, phone: form.phone || undefined }, token);
-      onSaved();
-    } catch (err: any) { setError(err.message || 'Erreur'); }
-    setSaving(false);
-  };
-
-  return (
-    <Modal title="Créer un Agent de Sécurité" onClose={onClose}>
-      <form onSubmit={submit} className="flex flex-col gap-4">
-        <Field label="Nom complet">
-          <input style={inputStyle} value={form.full_name} onChange={e => set('full_name', e.target.value)} required placeholder="Karim Boualem" />
-        </Field>
-        <Field label="Entreprise">
-          <select style={inputStyle} value={form.company_id} onChange={e => set('company_id', e.target.value)} required>
-            {companies.map(c => <option key={c.id} value={c.id}>{c.name} ({c.company_code})</option>)}
-          </select>
-        </Field>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="ID Employé">
-            <input style={inputStyle} value={form.employee_id} onChange={e => set('employee_id', e.target.value)} required placeholder="SON-001" />
-          </Field>
-          <Field label="Téléphone">
-            <input style={inputStyle} value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="+213550..." />
-          </Field>
-        </div>
-        <Field label="Mot de passe">
-          <div className="relative">
-            <input style={inputStyle} type={showPass ? 'text' : 'password'} value={form.password} onChange={e => set('password', e.target.value)} required minLength={6} placeholder="••••••••" />
-            <button type="button" onClick={() => setShowPass(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--sos-text-muted)' }}>
-              {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            </button>
-          </div>
-        </Field>
-        {error && <p className="text-sm" style={{ color: '#EF4444' }}>{error}</p>}
-        <div className="flex gap-2 pt-2">
-          <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-xl text-sm font-semibold" style={{ background: 'var(--sos-bg-surface-2)', color: 'var(--sos-text-secondary)', border: '1px solid var(--sos-border)' }}>Annuler</button>
-          <button type="submit" disabled={saving} className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white" style={{ background: saving ? 'var(--sos-border)' : 'linear-gradient(135deg,#10B981,#059669)', cursor: saving ? 'not-allowed' : 'pointer' }}>
-            {saving ? 'Création…' : 'Créer Agent'}
-          </button>
-        </div>
-      </form>
-    </Modal>
   );
 }
 

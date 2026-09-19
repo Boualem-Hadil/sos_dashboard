@@ -329,6 +329,13 @@ export async function createAdminCompanyApi(data: {
     contact_email?: string;
     subscription_start?: string;
     subscription_end?: string;
+    /** Optionally create the first company_admin atomically with the company. */
+    admin?: {
+        full_name: string;
+        employee_id: string;
+        password: string;
+        phone?: string;
+    };
 }, token: string) {
     return apiFetch('/admin/companies', { method: 'POST', body: JSON.stringify(data) }, token);
 }
@@ -351,16 +358,6 @@ export async function getExpiringCompaniesApi(token: string, days = 30) {
 
 export async function getAdminOfficersApi(token: string) {
     return apiFetch('/admin/officers', {}, token);
-}
-
-export async function createAdminOfficerApi(data: {
-    full_name: string;
-    employee_id: string;
-    password: string;
-    phone?: string;
-    company_id: string;
-}, token: string) {
-    return apiFetch('/admin/officers', { method: 'POST', body: JSON.stringify(data) }, token);
 }
 
 export async function deactivateAdminOfficerApi(userId: string, token: string) {
