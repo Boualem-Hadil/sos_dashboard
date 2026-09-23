@@ -7,6 +7,7 @@ import { EmergencyModal } from '../dashboard/EmergencyModal';
 import { useEmergency } from '@/context/EmergencyContext';
 import { useSSE } from '@/hooks/useSSE';
 import { getAuth, getToken } from '@/lib/auth';
+import { useRouter, usePathname } from 'next/navigation';
 
 function ToastContainer() {
   const { toasts, removeToast } = useEmergency();
@@ -230,6 +231,21 @@ function SSEInitializer() {
 }
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  
+  useEffect(() => {
+    const user = getAuth();
+    if (user) {
+      if (user.role === 'super_admin') {
+        router.push('/admin');
+      } else if (user.role === 'company_admin') {
+        router.push('/company-admin');
+      }
+    } else {
+      router.push('/login');
+    }
+  }, [router]);
+
   return (
     <>
       <SSEInitializer />

@@ -25,7 +25,9 @@ export default function LoginPage() {
     try {
       saveAuth(user);
       // Hard redirect to force EmergencyContext to remount and load fresh data
-      window.location.href = user.role === 'super_admin' ? '/admin' : '/';
+      if (user.role === 'super_admin') window.location.href = '/admin';
+      else if (user.role === 'company_admin') window.location.href = '/company-admin';
+      else window.location.href = '/';
     } catch (err) {
       console.error('Failed to save auth to localStorage:', err);
       setError('Erreur du navigateur: Impossible de sauvegarder la session. Vérifiez vos paramètres de cookies.');

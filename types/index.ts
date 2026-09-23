@@ -154,3 +154,52 @@ export interface NearbyWorker {
   latitude: number | null;
   longitude: number | null;
 }
+
+// ─── Company Admin ────────────────────────────────────────────────────────────
+
+export interface CompanyAdminStats {
+  total_officers: number;
+  total_workers: number;
+  total_departments: number;
+  month_emergencies_open: number;
+  month_emergencies_resolved: number;
+  avg_response_minutes: number | null;
+}
+
+export interface Unit {
+  id: string;
+  department_id: string;
+  name: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface Department {
+  id: string;
+  company_id: string;
+  name: string;
+  is_active: boolean;
+  created_at: string;
+  units: Unit[];
+}
+
+export interface OfficerUser {
+  id: string;
+  full_name: string;
+  employee_id: string;
+  phone: string | null;
+  role: 'safety_officer';
+  is_active: boolean;
+  created_at: string;
+  last_seen: string | null;
+  must_change_password?: boolean;
+}
+
+export interface NotificationRecipientCA {
+  id: string;
+  email: string;
+  name: string;
+  is_active: boolean;
+  created_at: string;
+  company_id: string | null;
+}

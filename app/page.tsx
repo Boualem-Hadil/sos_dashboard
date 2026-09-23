@@ -6,9 +6,22 @@ import { EmergencyTypeChart, MonthlyIncidentsChart } from '@/components/dashboar
 import { WorkerMapCard } from '@/components/dashboard/WorkerMapCard';
 import { LiveEmergencyPanel } from '@/components/dashboard/LiveEmergencyPanel';
 import { useEmergency } from '@/context/EmergencyContext';
+import { getAuth } from '@/lib/auth';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function DashboardPage() {
   const { company, isLoading, authError } = useEmergency();
+  const router = useRouter();
+
+  useEffect(() => {
+    const user = getAuth();
+    if (user?.role === 'super_admin') {
+      router.push('/admin');
+    } else if (user?.role === 'company_admin') {
+      router.push('/company-admin');
+    }
+  }, [router]);
 
   if (authError) {
     return <DashboardLayout><div className="flex h-full items-center justify-center text-red-500 font-bold text-2xl tracking-widest">{authError}</div></DashboardLayout>;

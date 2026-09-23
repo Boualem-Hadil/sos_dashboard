@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://192.168.1.67:8000';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://10.4.115.49:8000';
 
 // ── Generic fetch helper ──────────────────────────────────────────────────────
 async function apiFetch(
