@@ -63,7 +63,7 @@ export default function NotificationsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-black" style={{ color: 'var(--sos-text-primary)' }}>Notifications</h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--sos-text-secondary)' }}>Diffusion des alertes critiques (Entreprise)</p>
+          <p className="text-sm mt-1" style={{ color: 'var(--sos-text-secondary)' }}>Destinataires des alertes d'expiration d'abonnement</p>
         </div>
         <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-white transition-all hover:opacity-90" style={{ background: '#0EA5E9' }}>
           <Plus className="w-4 h-4" /> Ajouter un email
@@ -73,7 +73,7 @@ export default function NotificationsPage() {
       <div className="flex items-start gap-3 px-4 py-3 rounded-xl" style={{ background: 'rgba(14,165,233,0.08)', border: '1px solid rgba(14,165,233,0.2)' }}>
         <Info className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#0EA5E9' }} />
         <p className="text-xs" style={{ color: '#7DD3FC' }}>
-          Les destinataires ci-dessous recevront un email automatique pour toute <strong>nouvelle urgence</strong> déclenchée dans votre entreprise, ainsi qu'un rapport de résolution.
+          Les destinataires ci-dessous recevront un email automatique lorsque la licence ou l'abonnement de votre entreprise approche de son expiration.
         </p>
       </div>
 

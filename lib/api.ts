@@ -1,4 +1,10 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://10.4.115.49:8000';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+if (!BASE_URL) {
+    throw new Error(
+        '[api.ts] NEXT_PUBLIC_API_URL is not set. ' +
+        'Add it to .env.local (dev) or Railway environment variables (prod).'
+    );
+}
 
 // ── Generic fetch helper ──────────────────────────────────────────────────────
 async function apiFetch(

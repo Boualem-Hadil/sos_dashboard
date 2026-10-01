@@ -62,7 +62,7 @@ const MOCK_COMPANY = {
 
 // ─── API base ─────────────────────────────────────────────────────────────────
 
-const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
 async function apiGet<T>(path: string): Promise<T> {
   const token = getToken();
