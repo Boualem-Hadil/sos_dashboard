@@ -309,7 +309,7 @@ export function EmergencyModal() {
           {/* Body: sidebar (multi only) + main content + chat — CSS Grid, each column scrolls independently */}
           <div
             className="grid overflow-hidden h-full"
-            style={{ gridTemplateColumns: multiMode ? '16rem 1fr 24rem' : '1fr 24rem' }}
+            style={{ gridTemplateColumns: multiMode ? '16rem 1fr' : '1fr' }}
           >
 
             {/* ── Multi-emergency sidebar ───────────────────────────────────── */}
@@ -809,10 +809,12 @@ export function EmergencyModal() {
 
             </div>{/* end main content */}
 
-            {/* Right: chat side panel — width set by grid column track (24rem) */}
-            <div className="border-l overflow-hidden flex flex-col h-full" style={{ borderColor: 'var(--sos-border)' }}>
-              <EmergencyChat emergencyId={currentEmergency.id} />
-            </div>
+            {/* Right: chat side panel — TEMPORARILY HIDDEN for layout diagnosis */}
+            {false && (
+              <div className="border-l overflow-hidden flex flex-col h-full" style={{ borderColor: 'var(--sos-border)' }}>
+                <EmergencyChat emergencyId={currentEmergency.id} />
+              </div>
+            )}
 
           </div>{/* end flex body */}
         </motion.div>
