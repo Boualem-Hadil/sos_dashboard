@@ -621,7 +621,7 @@ export function EmergencyModal() {
                                       ) : (
                                         <>
                                           <Navigation className="w-3 h-3" />
-                                          {w.distance_km?.toFixed(2)} km
+                                          {w.distance_km != null ? `${w.distance_km.toFixed(2)} km` : 'Position inconnue'}
                                         </>
                                       )}
                                     </div>
@@ -654,8 +654,8 @@ export function EmergencyModal() {
                                 extraMarkers={nearbyWorkers
                                   .filter(w => w.latitude != null && w.longitude != null)
                                   .map((w, i) => ({
-                                    position: [w.latitude!, w.longitude!] as [number, number],
-                                    label: `${i + 1}. ${w.full_name} (${w.distance_km?.toFixed(2)} km)`,
+                                    position: [w.latitude as number, w.longitude as number],
+                                    label: `${i + 1}. ${w.full_name} (${w.distance_km != null ? w.distance_km.toFixed(2) : '--'} km)`,
                                     color: 'blue',
                                   }))}
                               />
