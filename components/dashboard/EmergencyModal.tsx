@@ -812,7 +812,7 @@ export function EmergencyModal() {
             {/* Right: chat side panel — TEMPORARILY HIDDEN for layout diagnosis */}
             {false && (
               <div className="border-l overflow-hidden flex flex-col h-full" style={{ borderColor: 'var(--sos-border)' }}>
-                <EmergencyChat emergencyId={currentEmergency.id} />
+                <EmergencyChat emergencyId={currentEmergency?.id ?? ''} />
               </div>
             )}
 
