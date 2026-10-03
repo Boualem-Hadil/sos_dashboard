@@ -3,7 +3,6 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { StatsCards } from '@/components/dashboard/StatsCards';
 import { RecentEmergencies } from '@/components/dashboard/RecentEmergencies';
 import { EmergencyTypeChart, MonthlyIncidentsChart } from '@/components/dashboard/Charts';
-import { WorkerMapCard } from '@/components/dashboard/WorkerMapCard';
 import { LiveEmergencyPanel } from '@/components/dashboard/LiveEmergencyPanel';
 import { useEmergency } from '@/context/EmergencyContext';
 import { getAuth } from '@/lib/auth';
@@ -39,8 +38,6 @@ export default function DashboardPage() {
           <p className="text-sm mt-1" style={{ color: 'var(--sos-text-secondary)' }}>Surveillance en temps réel — {company.name}</p>
         </div>
         <StatsCards />
-        {/* Live worker location map — always visible, updates every ~15 s */}
-        <WorkerMapCard />
         <LiveEmergencyPanel />
 
         <div className="grid grid-cols-2 gap-4">

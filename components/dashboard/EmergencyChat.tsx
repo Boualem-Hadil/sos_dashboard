@@ -194,12 +194,12 @@ export function EmergencyChat({ emergencyId }: { emergencyId: string }) {
   };
 
   return (
-    <div className="flex flex-col h-full rounded-xl border" style={{ background: 'var(--sos-bg-surface-2)', borderColor: 'var(--sos-border)' }}>
+    <div className="flex flex-col min-h-0 h-full rounded-xl border" style={{ background: 'var(--sos-bg-surface-2)', borderColor: 'var(--sos-border)' }}>
       <div className="p-3 border-b font-bold" style={{ borderColor: 'var(--sos-border)' }}>
         Chat d'Urgence
       </div>
       
-      <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-3 min-h-[300px] max-h-[400px]">
+      <div className="flex-1 min-h-0 p-4 overflow-y-auto flex flex-col gap-3">
         {loading ? (
           <div className="text-center text-sm" style={{ color: 'var(--sos-text-muted)' }}>Chargement des messages...</div>
         ) : messages.length === 0 ? (

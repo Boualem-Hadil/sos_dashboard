@@ -306,8 +306,8 @@ export function EmergencyModal() {
             </button>
           </div>
 
-          {/* Body: sidebar (multi only) + main content */}
-          <div className="flex flex-1 overflow-hidden">
+          {/* Body: sidebar (multi only) + main content + chat */}
+          <div className="flex flex-1 min-h-0 overflow-hidden">
 
             {/* ── Multi-emergency sidebar ───────────────────────────────────── */}
             {multiMode && (
@@ -347,7 +347,7 @@ export function EmergencyModal() {
             )}
 
             {/* ── Main modal content ────────────────────────────────────────── */}
-            <div className="flex-1 overflow-y-auto p-6 md:p-8 flex flex-col gap-6">
+            <div className="flex-1 min-h-0 overflow-y-auto p-6 md:p-8 flex flex-col gap-6">
 
               {/* ── NOT-RESPONDING ALERT (Phase D) ─────────────────────────────── */}
               <AnimatePresence>
@@ -807,7 +807,7 @@ export function EmergencyModal() {
             </div>{/* end main content */}
 
             {/* Right: chat side panel, fixed width, own scroll */}
-            <div className="w-96 flex-shrink-0 border-l overflow-hidden flex flex-col" style={{ borderColor: 'var(--sos-border)' }}>
+            <div className="w-96 flex-shrink-0 min-h-0 border-l flex flex-col" style={{ borderColor: 'var(--sos-border)' }}>
               <EmergencyChat emergencyId={currentEmergency.id} />
             </div>
 
