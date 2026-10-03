@@ -35,6 +35,19 @@ function RecenterAutomatically({ lat, lng }: { lat: number; lng: number }) {
   return null;
 }
 
+// Fixes Leaflet rendering inside animated/hidden containers:
+// Leaflet calculates its own size on init. If the container starts at height:0
+// (AnimatePresence), the map renders blank. invalidateSize() forces a recalc.
+function MapResizer() {
+  const map = useMap();
+  useEffect(() => {
+    // Small delay lets the CSS animation finish before we measure
+    const t = setTimeout(() => map.invalidateSize(), 100);
+    return () => clearTimeout(t);
+  }, [map]);
+  return null;
+}
+
 // Glowing red pulse icon for the victim
 const pulseIcon = new L.DivIcon({
   className: 'custom-pulse-icon',
@@ -113,7 +126,7 @@ export default function SOSMap({ center, zoom = 14, label, extraMarkers }: MapPr
         center={center}
         zoom={zoom}
         scrollWheelZoom={false}
-        style={{ height: '100%', width: '100%', borderRadius: '0.75rem', zIndex: 10 }}
+        style={{ height: '100%', width: '100%', borderRadius: '0.75rem' }}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
@@ -137,6 +150,7 @@ export default function SOSMap({ center, zoom = 14, label, extraMarkers }: MapPr
           )}
         </Marker>
       ))}
+        <MapResizer />
         <RecenterAutomatically lat={center[0]} lng={center[1]} />
       </MapContainer>
     </>

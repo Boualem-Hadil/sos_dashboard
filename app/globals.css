@@ -405,3 +405,14 @@ body {
     padding: 20px;
   }
 }
+
+/* Constrain Leaflet map z-indexes so they do not overlap modal UI */
+.leaflet-container {
+  z-index: 10 !important;
+}
+.leaflet-pane {
+  z-index: 10 !important;
+}
+.leaflet-top, .leaflet-bottom {
+  z-index: 10 !important;
+}

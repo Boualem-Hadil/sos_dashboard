@@ -440,7 +440,7 @@ export function EmergencyModal() {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden"
+                    transition={{ duration: 0.3 }}
                   >
                     <div className="h-[280px] w-full rounded-xl border mt-2 shadow-inner" style={{ borderColor: 'var(--sos-border)' }}>
                       <SOSMap center={mapCenter} zoom={15} label={`Urgence: ${workerName}`} />
