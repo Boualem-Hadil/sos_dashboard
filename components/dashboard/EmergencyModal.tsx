@@ -309,13 +309,13 @@ export function EmergencyModal() {
           {/* Body: sidebar (multi only) + main content + chat — CSS Grid, each column scrolls independently */}
           <div
             className="grid overflow-hidden h-full"
-            style={{ gridTemplateColumns: multiMode ? '16rem 1fr' : '1fr' }}
+            style={{ gridTemplateColumns: multiMode ? '12rem 1fr 24rem' : '1fr 24rem' }}
           >
 
             {/* ── Multi-emergency sidebar ───────────────────────────────────── */}
             {multiMode && (
               <div className="overflow-y-auto border-r h-full" style={{ borderColor: 'var(--sos-border)', background: 'var(--sos-bg-surface-2)' }}>
-                <div className="px-4 py-3 text-sm font-bold uppercase tracking-wider" style={{ color: 'var(--sos-text-muted)' }}>Urgences actives</div>
+                <div className="px-3 py-2 text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--sos-text-muted)' }}>Urgences</div>
                 {activeEmergencies.map((e) => {
                   const isSelected = e.id === selectedEmergencyId;
                   const elapsedMin = Math.floor((Date.now() - new Date(e.startedAt).getTime()) / 60000);
@@ -325,22 +325,22 @@ export function EmergencyModal() {
                     <button
                       key={e.id}
                       onClick={() => selectEmergency(e.id)}
-                      className="w-full text-left px-4 py-4 border-b transition-colors"
+                      className="w-full text-left px-3 py-3 border-b transition-colors"
                       style={{
                         borderColor: 'var(--sos-border)',
                         background: isSelected ? 'rgba(239,68,68,0.12)' : 'transparent',
-                        borderLeft: isSelected ? '4px solid #ef4444' : '4px solid transparent',
+                        borderLeft: isSelected ? '3px solid #ef4444' : '3px solid transparent',
                       }}
                     >
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: severityColor }} />
-                        <span className="text-sm font-bold truncate" style={{ color: 'var(--sos-text-primary)' }}>{e.workerName}</span>
+                      <div className="flex items-center gap-1.5 mb-0.5">
+                        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: severityColor }} />
+                        <span className="text-xs font-bold truncate" style={{ color: 'var(--sos-text-primary)' }}>{e.workerName}</span>
                       </div>
-                      <div className="text-sm capitalize font-medium" style={{ color: 'var(--sos-text-secondary)' }}>{e.type}</div>
-                      <div className="text-xs mt-0.5" style={{ color: 'var(--sos-text-muted)' }}>{elapsedMin} min</div>
+                      <div className="text-xs capitalize" style={{ color: 'var(--sos-text-secondary)' }}>{e.type}</div>
+                      <div className="text-[10px] mt-0.5" style={{ color: 'var(--sos-text-muted)' }}>{elapsedMin} min</div>
                       {hasDuplicate && (
-                        <div className="mt-1.5 text-xs font-semibold" style={{ color: '#f59e0b' }}>
-                          ⚠ doublon possible
+                        <div className="mt-1 text-[10px] font-semibold" style={{ color: '#f59e0b' }}>
+                          ⚠ doublon
                         </div>
                       )}
                     </button>
@@ -809,12 +809,10 @@ export function EmergencyModal() {
 
             </div>{/* end main content */}
 
-            {/* Right: chat side panel — TEMPORARILY HIDDEN for layout diagnosis */}
-            {false && (
-              <div className="border-l overflow-hidden flex flex-col h-full" style={{ borderColor: 'var(--sos-border)' }}>
-                <EmergencyChat emergencyId={currentEmergency?.id ?? ''} />
-              </div>
-            )}
+            {/* Right: chat side panel — width set by grid column track (24rem) */}
+            <div className="border-l overflow-hidden flex flex-col h-full" style={{ borderColor: 'var(--sos-border)' }}>
+              <EmergencyChat emergencyId={currentEmergency?.id ?? ''} />
+            </div>
 
           </div>{/* end flex body */}
         </motion.div>
