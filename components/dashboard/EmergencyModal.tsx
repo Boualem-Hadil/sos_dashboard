@@ -281,8 +281,8 @@ export function EmergencyModal() {
           initial={{ scale: 0.9, y: 20 }}
           animate={{ scale: 1, y: 0 }}
           exit={{ scale: 0.9, y: 20 }}
-          className="relative w-full max-w-5xl border-2 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] min-h-0"
-          style={{ background: 'var(--sos-bg-surface)', borderColor: '#E53935' }}
+          className="relative w-full max-w-5xl border-2 rounded-2xl shadow-2xl overflow-hidden grid max-h-[95vh]"
+          style={{ background: 'var(--sos-bg-surface)', borderColor: '#E53935', gridTemplateRows: 'auto 1fr' }}
         >
           {/* Header */}
           <div className="bg-red-600 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
@@ -306,12 +306,15 @@ export function EmergencyModal() {
             </button>
           </div>
 
-          {/* Body: sidebar (multi only) + main content */}
-          <div className="flex flex-1 min-h-0 overflow-hidden">
+          {/* Body: sidebar (multi only) + main content + chat — CSS Grid, each column scrolls independently */}
+          <div
+            className="grid overflow-hidden"
+            style={{ gridTemplateColumns: multiMode ? '16rem 1fr 24rem' : '1fr 24rem', height: '100%' }}
+          >
 
             {/* ── Multi-emergency sidebar ───────────────────────────────────── */}
             {multiMode && (
-              <div className="w-64 flex-shrink-0 border-r overflow-y-auto" style={{ borderColor: 'var(--sos-border)', background: 'var(--sos-bg-surface-2)' }}>
+              <div className="overflow-y-auto border-r h-full" style={{ borderColor: 'var(--sos-border)', background: 'var(--sos-bg-surface-2)' }}>
                 <div className="px-4 py-3 text-sm font-bold uppercase tracking-wider" style={{ color: 'var(--sos-text-muted)' }}>Urgences actives</div>
                 {activeEmergencies.map((e) => {
                   const isSelected = e.id === selectedEmergencyId;
@@ -347,7 +350,7 @@ export function EmergencyModal() {
             )}
 
             {/* ── Main modal content ────────────────────────────────────────── */}
-            <div className="flex-1 min-h-0 overflow-y-auto p-6 md:p-8 flex flex-col gap-6">
+            <div className="overflow-y-auto p-6 md:p-8 flex flex-col gap-6">
 
               {/* ── NOT-RESPONDING ALERT (Phase D) ─────────────────────────────── */}
               <AnimatePresence>
@@ -806,8 +809,8 @@ export function EmergencyModal() {
 
             </div>{/* end main content */}
 
-            {/* Right: chat side panel, fixed width, own scroll */}
-            <div className="w-96 flex-shrink-0 border-l overflow-hidden flex flex-col min-h-0" style={{ borderColor: 'var(--sos-border)' }}>
+            {/* Right: chat side panel — width set by grid column track (24rem) */}
+            <div className="border-l overflow-hidden flex flex-col h-full" style={{ borderColor: 'var(--sos-border)' }}>
               <EmergencyChat emergencyId={currentEmergency.id} />
             </div>
 
