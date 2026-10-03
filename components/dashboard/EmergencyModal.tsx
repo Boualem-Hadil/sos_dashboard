@@ -281,7 +281,7 @@ export function EmergencyModal() {
           initial={{ scale: 0.9, y: 20 }}
           animate={{ scale: 1, y: 0 }}
           exit={{ scale: 0.9, y: 20 }}
-          className="relative w-full max-w-5xl border-2 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh]"
+          className="relative w-full max-w-5xl border-2 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] min-h-0"
           style={{ background: 'var(--sos-bg-surface)', borderColor: '#E53935' }}
         >
           {/* Header */}
@@ -306,7 +306,7 @@ export function EmergencyModal() {
             </button>
           </div>
 
-          {/* Body: sidebar (multi only) + main content + chat */}
+          {/* Body: sidebar (multi only) + main content */}
           <div className="flex flex-1 min-h-0 overflow-hidden">
 
             {/* ── Multi-emergency sidebar ───────────────────────────────────── */}
@@ -440,7 +440,7 @@ export function EmergencyModal() {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
+                    className="overflow-hidden"
                   >
                     <div className="h-[280px] w-full rounded-xl border mt-2 shadow-inner" style={{ borderColor: 'var(--sos-border)' }}>
                       <SOSMap center={mapCenter} zoom={15} label={`Urgence: ${workerName}`} />
@@ -621,7 +621,7 @@ export function EmergencyModal() {
                                       ) : (
                                         <>
                                           <Navigation className="w-3 h-3" />
-                                          {w.distance_km != null ? `${w.distance_km.toFixed(2)} km` : 'Position inconnue'}
+                                          {w.distance_km?.toFixed(2)} km
                                         </>
                                       )}
                                     </div>
@@ -646,7 +646,7 @@ export function EmergencyModal() {
 
                           {/* Mini map with nearby worker markers (only those with GPS) */}
                           {nearbyWorkers.filter(w => w.latitude != null && w.longitude != null).length > 0 && hasCoordinates && (
-                            <div className="h-[220px] rounded-xl border relative" style={{ borderColor: 'var(--sos-border)', zIndex: 1 }}>
+                            <div className="h-[220px] rounded-xl overflow-hidden border" style={{ borderColor: 'var(--sos-border)' }}>
                               <SOSMap
                                 center={mapCenter}
                                 zoom={13}
@@ -654,8 +654,8 @@ export function EmergencyModal() {
                                 extraMarkers={nearbyWorkers
                                   .filter(w => w.latitude != null && w.longitude != null)
                                   .map((w, i) => ({
-                                    position: [w.latitude as number, w.longitude as number],
-                                    label: `${i + 1}. ${w.full_name} (${w.distance_km != null ? w.distance_km.toFixed(2) : '--'} km)`,
+                                    position: [w.latitude!, w.longitude!] as [number, number],
+                                    label: `${i + 1}. ${w.full_name} (${w.distance_km?.toFixed(2)} km)`,
                                     color: 'blue',
                                   }))}
                               />
@@ -807,7 +807,7 @@ export function EmergencyModal() {
             </div>{/* end main content */}
 
             {/* Right: chat side panel, fixed width, own scroll */}
-            <div className="w-96 flex-shrink-0 min-h-0 border-l flex flex-col" style={{ borderColor: 'var(--sos-border)' }}>
+            <div className="w-96 flex-shrink-0 border-l overflow-hidden flex flex-col min-h-0" style={{ borderColor: 'var(--sos-border)' }}>
               <EmergencyChat emergencyId={currentEmergency.id} />
             </div>
 
