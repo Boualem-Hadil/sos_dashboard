@@ -281,7 +281,7 @@ export function EmergencyModal() {
           initial={{ scale: 0.9, y: 20 }}
           animate={{ scale: 1, y: 0 }}
           exit={{ scale: 0.9, y: 20 }}
-          className="relative w-full max-w-5xl border-2 rounded-2xl shadow-2xl overflow-hidden grid max-h-[95vh]"
+          className="relative w-full max-w-5xl border-2 rounded-2xl shadow-2xl overflow-hidden grid h-screen max-h-[95vh]"
           style={{ background: 'var(--sos-bg-surface)', borderColor: '#E53935', gridTemplateRows: 'auto 1fr' }}
         >
           {/* Header */}
@@ -308,8 +308,8 @@ export function EmergencyModal() {
 
           {/* Body: sidebar (multi only) + main content + chat — CSS Grid, each column scrolls independently */}
           <div
-            className="grid overflow-hidden"
-            style={{ gridTemplateColumns: multiMode ? '16rem 1fr 24rem' : '1fr 24rem', height: '100%' }}
+            className="grid overflow-hidden h-full"
+            style={{ gridTemplateColumns: multiMode ? '16rem 1fr 24rem' : '1fr 24rem' }}
           >
 
             {/* ── Multi-emergency sidebar ───────────────────────────────────── */}
