@@ -646,7 +646,7 @@ export function EmergencyModal() {
 
                           {/* Mini map with nearby worker markers (only those with GPS) */}
                           {nearbyWorkers.filter(w => w.latitude != null && w.longitude != null).length > 0 && hasCoordinates && (
-                            <div className="h-[220px] rounded-xl overflow-hidden border" style={{ borderColor: 'var(--sos-border)' }}>
+                            <div className="h-[220px] rounded-xl border relative" style={{ borderColor: 'var(--sos-border)', zIndex: 1 }}>
                               <SOSMap
                                 center={mapCenter}
                                 zoom={13}
