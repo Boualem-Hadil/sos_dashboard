@@ -436,21 +436,21 @@ export function EmergencyModal() {
                 </div>
               </div>
 
-              {/* Expandable victim map */}
-              <AnimatePresence>
-                {isMapExpanded && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="h-[280px] w-full rounded-xl border mt-2 shadow-inner" style={{ borderColor: 'var(--sos-border)' }}>
-                      <SOSMap center={mapCenter} zoom={15} label={`Urgence: ${workerName}`} />
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {/* Expandable victim map — use CSS grid-rows transition, NOT Framer Motion height:auto
+                  (FM measures height before layout settles in a grid cell, always gets 0) */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateRows: isMapExpanded ? '1fr' : '0fr',
+                  transition: 'grid-template-rows 0.3s ease',
+                }}
+              >
+                <div style={{ overflow: 'hidden' }}>
+                  <div className="h-[280px] w-full rounded-xl border mt-2 shadow-inner" style={{ borderColor: 'var(--sos-border)' }}>
+                    <SOSMap center={mapCenter} zoom={15} label={`Urgence: ${workerName}`} />
+                  </div>
+                </div>
+              </div>
 
               {/* Emergency Details */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -564,7 +564,7 @@ export function EmergencyModal() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
-                    className="rounded-xl border-2 overflow-hidden"
+                    className="rounded-xl border-2"
                     style={{ borderColor: 'rgba(245,158,11,0.5)', background: 'var(--sos-bg-surface-2)' }}
                   >
                     <div className="flex items-center justify-between px-5 py-3" style={{ background: 'rgba(245,158,11,0.12)', borderBottom: '1px solid rgba(245,158,11,0.3)' }}>
