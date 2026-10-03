@@ -6,7 +6,7 @@ if (!BASE_URL) {
     );
 }
 
-// ── Generic fetch helper ──────────────────────────────────────────────────────
+// -- Generic fetch helper ----
 async function apiFetch(
     endpoint: string,
     options: RequestInit = {},
@@ -38,7 +38,7 @@ async function apiFetch(
     return data;
 }
 
-// ── Auth ──────────────────────────────────────────────────────────────────────
+// -- Auth ----
 export async function loginApi(
     employeeId: string,
     password: string,
@@ -77,7 +77,7 @@ export async function getMeApi(token: string) {
     return apiFetch('/auth/me', {}, token);
 }
 
-// ── Workers ───────────────────────────────────────────────────────────────────
+// -- Workers ----
 export async function getWorkersApi(token: string) {
     return apiFetch('/users', {}, token);
 }
@@ -145,7 +145,7 @@ export async function updateWorkerMedicalApi(
     }, token);
 }
 
-// ── Emergencies ───────────────────────────────────────────────────────────────
+// -- Emergencies ----
 export async function getEmergenciesApi(
     token: string,
     params?: {
@@ -226,7 +226,7 @@ export async function getNearbyWorkersApi(
     );
 }
 
-// ── Chat ──────────────────────────────────────────────────────────────────────
+// -- Chat ----
 export async function getMessagesApi(emergencyId: string, token: string) {
     return apiFetch(`/emergencies/${emergencyId}/messages`, {}, token);
 }
@@ -279,7 +279,7 @@ export async function fetchAudioBlobUrl(emergencyId: string, fileId: string, tok
 
 }
 
-// ── Company ───────────────────────────────────────────────────────────────────
+// -- Company ----
 export async function getCompanyApi(id: string, token: string) {
     return apiFetch(`/companies/${id}`, {}, token);
 }
@@ -291,7 +291,7 @@ export async function updateCompanyInfoApi(id: string, data: any, token: string)
     }, token);
 }
 
-// ── SSE ───────────────────────────────────────────────────────────────────────
+// -- SSE ----
 export function createSSEConnection(
     companyId: string,
     token: string,
@@ -318,7 +318,7 @@ export function createSSEConnection(
     return eventSource;
 }
 
-// ── Admin ─────────────────────────────────────────────────────────────────────
+// -- Admin ----
 export async function getAdminStatsApi(token: string) {
     return apiFetch('/admin/stats', {}, token);
 }

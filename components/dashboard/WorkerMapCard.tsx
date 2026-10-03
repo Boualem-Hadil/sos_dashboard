@@ -8,7 +8,7 @@ import type { WorkerLocation } from '@/types';
 // Leaflet must only render on the client — dynamic import with ssr:false
 const WorkerMap = dynamic(() => import('./WorkerMap'), { ssr: false, loading: () => <MapSkeleton /> });
 
-// ── Skeleton shown while Leaflet loads ────────────────────────────────────────
+// -- Skeleton shown while Leaflet loads ----
 function MapSkeleton() {
   return (
     <div
@@ -22,7 +22,7 @@ function MapSkeleton() {
   );
 }
 
-// ── Legend dot ────────────────────────────────────────────────────────────────
+// -- Legend dot ----
 function LegendDot({ colour, label }: { colour: string; label: string }) {
   return (
     <div className="flex items-center gap-1.5">
@@ -40,7 +40,7 @@ function LegendDot({ colour, label }: { colour: string; label: string }) {
   );
 }
 
-// ── Main card ─────────────────────────────────────────────────────────────────
+// -- Main card ----
 export function WorkerMapCard() {
   const { workerLocations, isLoading } = useEmergency();
 

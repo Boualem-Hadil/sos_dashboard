@@ -15,7 +15,7 @@ import {
   getExpiringCompaniesApi,
 } from '@/lib/api';
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+// --- Types ----
 
 interface AdminStats {
   total_companies: number;
@@ -61,7 +61,7 @@ interface NotifRecipient {
   is_active: boolean;
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// --- Helpers ----
 
 function daysUntil(dateStr: string | null): number | null {
   if (!dateStr) return null;
@@ -85,7 +85,7 @@ function fmtDate(d: string | null) {
 
 const INDUSTRIES = ['oil', 'construction', 'mining', 'factory', 'chemical', 'transport', 'energy', 'other'];
 
-// ─── Small reusable input ─────────────────────────────────────────────────────
+// --- Small reusable input ----
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -104,7 +104,7 @@ const inputStyle: React.CSSProperties = {
   color: 'var(--sos-text-primary)', fontSize: '14px', transition: 'border-color 0.15s',
 };
 
-// ─── Modal wrapper ────────────────────────────────────────────────────────────
+// --- Modal wrapper ----
 
 function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   return (
@@ -122,7 +122,7 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
   );
 }
 
-// ─── Stats Cards ─────────────────────────────────────────────────────────────
+// --- Stats Cards ----
 
 function StatsGrid({ stats }: { stats: AdminStats }) {
   const cards = [
@@ -150,7 +150,7 @@ function StatsGrid({ stats }: { stats: AdminStats }) {
   );
 }
 
-// ─── Companies Table ──────────────────────────────────────────────────────────
+// --- Companies Table ----
 
 function CompaniesTab({ token, onToast }: { token: string; onToast: (m: string, t?: 'ok' | 'err') => void }) {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -266,7 +266,7 @@ function CompaniesTab({ token, onToast }: { token: string; onToast: (m: string, 
   );
 }
 
-// ─── Company Create/Edit Modal ────────────────────────────────────────────────
+// --- Company Create/Edit Modal ----
 
 function CompanyModal({ token, company, onClose, onSaved, onToast }: {
   token: string; company?: Company;
@@ -430,7 +430,7 @@ function CompanyModal({ token, company, onClose, onSaved, onToast }: {
   );
 }
 
-// ─── Officers Panel ───────────────────────────────────────────────────────────
+// --- Officers Panel ----
 
 function OfficersTab({ token, onToast }: { token: string; onToast: (m: string, t?: 'ok' | 'err') => void }) {
   const [officers, setOfficers] = useState<Officer[]>([]);
@@ -524,7 +524,7 @@ function OfficersTab({ token, onToast }: { token: string; onToast: (m: string, t
   );
 }
 
-// ─── License Panel ────────────────────────────────────────────────────────────
+// --- License Panel ----
 
 function LicenseTab({ token, onToast }: { token: string; onToast: (m: string, t?: 'ok' | 'err') => void }) {
   const [expiring, setExpiring] = useState<Company[]>([]);
@@ -630,7 +630,7 @@ function LicenseTab({ token, onToast }: { token: string; onToast: (m: string, t?
   );
 }
 
-// ─── Notification Recipients Panel ───────────────────────────────────────────
+// --- Notification Recipients Panel ----
 
 function NotifTab({ token, onToast }: { token: string; onToast: (m: string, t?: 'ok' | 'err') => void }) {
   const [recipients, setRecipients] = useState<NotifRecipient[]>([]);
@@ -722,7 +722,7 @@ function NotifTab({ token, onToast }: { token: string; onToast: (m: string, t?: 
   );
 }
 
-// ─── Main Admin Page ──────────────────────────────────────────────────────────
+// --- Main Admin Page ----
 
 type Tab = 'overview' | 'companies' | 'officers' | 'licenses' | 'notifications';
 

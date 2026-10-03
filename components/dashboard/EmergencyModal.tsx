@@ -17,7 +17,7 @@ const SOSMap = dynamic(() => import('@/components/dashboard/Map'), {
   ),
 });
 
-// ── Ping cooldown window in milliseconds (mirrors backend PING_RESPONSE_WINDOW_SECONDS) ──
+// -- Ping cooldown window in milliseconds (mirrors backend PING_RESPONSE_WINDOW_SECONDS) --
 const PING_WINDOW_MS = 60_000;
 
 export function EmergencyModal() {
@@ -34,18 +34,18 @@ export function EmergencyModal() {
   const [etaMinutes, setEtaMinutes] = useState<number | ''>('');
   const [resolutionNotes, setResolutionNotes] = useState('');
 
-  // ── Ping state ─────────────────────────────────────────────────────────────
+  // -- Ping state ----
   const [isSendingPing, setIsSendingPing] = useState(false);
   const [pingCooldownLeft, setPingCooldownLeft] = useState(0); // seconds remaining in cooldown
   const pingTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // ── Nearby workers state ───────────────────────────────────────────────────
+  // -- Nearby workers state ----
   const [showNearby, setShowNearby] = useState(false);
   const [nearbyWorkers, setNearbyWorkers] = useState<NearbyWorker[]>([]);
   const [isLoadingNearby, setIsLoadingNearby] = useState(false);
   const [nearbyError, setNearbyError] = useState<string | null>(null);
 
-  // ── Reset states when no emergencies are active ─────────────────────────────
+  // -- Reset states when no emergencies are active ----
   useEffect(() => {
     if (activeEmergencies.length === 0) {
       setIsMuted(false);
@@ -58,7 +58,7 @@ export function EmergencyModal() {
     }
   }, [activeEmergencies.length]);
 
-  // ── Not-responding poll: after PING_SENT, flip notResponding after 60 s ───
+  // -- Not-responding poll: after PING_SENT, flip notResponding after 60 s ---
   const notRespondingRef = useRef(false);
   const notRespondingTimer = useRef<NodeJS.Timeout | null>(null);
 
@@ -81,7 +81,7 @@ export function EmergencyModal() {
     };
   }, [currentEmergency?.pingStatus]);
 
-  // ── Ping cooldown countdown ────────────────────────────────────────────────
+  // -- Ping cooldown countdown ----
   useEffect(() => {
     if (pingCooldownLeft <= 0) return;
     pingTimerRef.current = setInterval(() => {
@@ -96,7 +96,7 @@ export function EmergencyModal() {
     return () => { if (pingTimerRef.current) clearInterval(pingTimerRef.current); };
   }, [pingCooldownLeft]);
 
-  // ── Web Audio API for beeping ───────────────────────────────────────────────
+  // -- Web Audio API for beeping ----
   const audioCtxRef = useRef<AudioContext | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -136,7 +136,7 @@ export function EmergencyModal() {
 
   const multiMode = activeEmergencies.length > 1;
 
-  // ── Second audio: two quick beeps at 1200 Hz every 20 s when multi-emergency ──
+  // -- Second audio: two quick beeps at 1200 Hz every 20 s when multi-emergency --
   const multiBeepRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
     if (multiMode && !isMuted && audioCtxRef.current) {
@@ -183,7 +183,7 @@ export function EmergencyModal() {
 
   if (status !== 'active' || !currentEmergency) return null;
 
-  // ── Resolve handler ────────────────────────────────────────────────────────
+  // -- Resolve handler ----
   const handleResolve = async () => {
     // Capture the id BEFORE the await — the SSE EMERGENCY_RESOLVED echo may arrive
     // before the HTTP response returns, which would already move selectedEmergencyId
@@ -215,7 +215,7 @@ export function EmergencyModal() {
     }
   };
 
-  // ── Ping handler ───────────────────────────────────────────────────────────
+  // -- Ping handler ----
   const handleSendPing = async () => {
     if (isSendingPing || pingCooldownLeft > 0) return;
     setIsSendingPing(true);
@@ -233,7 +233,7 @@ export function EmergencyModal() {
     }
   };
 
-  // ── Nearby workers handler ─────────────────────────────────────────────────
+  // -- Nearby workers handler ----
   const handleFindNearby = async () => {
     setShowNearby(true);
     setIsLoadingNearby(true);

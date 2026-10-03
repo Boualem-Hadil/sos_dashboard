@@ -149,7 +149,7 @@ function SSEInitializer() {
         }
         dispatchResolvedEmergency(mappedEmergency as any);
 
-        // ── NEW: live GPS heartbeat from the worker ────────────────────────────
+        // -- NEW: live GPS heartbeat from the worker ----
       } else if (type === 'HEARTBEAT_UPDATED') {
         updateEmergencyFields(data.emergency_id, {
           heartbeatLat: data.latitude,
@@ -159,13 +159,13 @@ function SSEInitializer() {
           gpsCoordinates: { lat: data.latitude, lng: data.longitude },
         });
 
-        // ── NEW: officer sent an "are you OK?" ping ───────────────────────────
+        // -- NEW: officer sent an "are you OK?" ping ----
       } else if (type === 'PING_SENT') {
         updateEmergencyFields(data.emergency_id, {
           pingStatus: 'sent',
         });
 
-        // ── NEW: worker acknowledged the ping ─────────────────────────────────
+        // -- NEW: worker acknowledged the ping ----
       } else if (type === 'PING_ACKED') {
         updateEmergencyFields(data.emergency_id, {
           pingStatus: 'acked',

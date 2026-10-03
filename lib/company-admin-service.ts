@@ -2,12 +2,12 @@
 import { getToken } from './auth';
 import type { CompanyAdminStats, Department, OfficerUser, NotificationRecipientCA, Emergency } from '@/types';
 
-// ─── Feature flag — flip to false when backend is ready ─────────────────────
+// --- Feature flag — flip to false when backend is ready ----
 const USE_MOCK = false;
 
 function delay(ms: number) { return new Promise(r => setTimeout(r, ms)); }
 
-// ─── Mock data ───────────────────────────────────────────────────────────────
+// --- Mock data ----
 
 const MOCK_STATS: CompanyAdminStats = {
   total_officers: 3,
@@ -60,7 +60,7 @@ const MOCK_COMPANY = {
   subscription_start: '2024-01-01', subscription_end: '2025-12-31',
 };
 
-// ─── API base ─────────────────────────────────────────────────────────────────
+// --- API base ----
 
 const BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -128,14 +128,14 @@ async function apiDelete(path: string): Promise<void> {
   if (!res.ok) throw new Error(`${res.status}`);
 }
 
-// ─── Overview ─────────────────────────────────────────────────────────────────
+// --- Overview ----
 
 export async function caGetOverview(): Promise<CompanyAdminStats> {
   if (USE_MOCK) { await delay(300); return MOCK_STATS; }
   return apiGet('/company-admin/overview');
 }
 
-// ─── Officers ─────────────────────────────────────────────────────────────────
+// --- Officers ----
 
 export async function caGetOfficers(includeInactive = false): Promise<OfficerUser[]> {
   if (USE_MOCK) { await delay(300); return includeInactive ? MOCK_OFFICERS : MOCK_OFFICERS.filter(o => o.is_active); }
@@ -162,7 +162,7 @@ export async function caResetPassword(id: string): Promise<{ temp_password: stri
   return apiPatch(`/company-admin/officers/${id}/reset-password`);
 }
 
-// ─── Workers (read-only) ──────────────────────────────────────────────────────
+// --- Workers (read-only) ----
 
 export async function caGetWorkers(department?: string): Promise<any[]> {
   if (USE_MOCK) {
@@ -176,7 +176,7 @@ export async function caGetWorkers(department?: string): Promise<any[]> {
   return apiGet(`/company-admin/workers${qs}`);
 }
 
-// ─── Departments ──────────────────────────────────────────────────────────────
+// --- Departments ----
 
 export async function caGetDepartments(): Promise<Department[]> {
   if (USE_MOCK) { await delay(300); return [...MOCK_DEPARTMENTS]; }
@@ -218,7 +218,7 @@ export async function caUpdateUnit(deptId: string, unitId: string, body: { name?
   return apiPut(`/company-admin/departments/${deptId}/units/${unitId}`, body);
 }
 
-// ─── Notifications ────────────────────────────────────────────────────────────
+// --- Notifications ----
 
 let _mockNotifs = [...MOCK_NOTIFICATIONS];
 
@@ -241,7 +241,7 @@ export async function caRemoveNotification(id: string): Promise<void> {
   await apiDelete(`/company-admin/notifications/${id}`);
 }
 
-// ─── History ──────────────────────────────────────────────────────────────────
+// --- History ----
 
 export async function caGetHistory(filters?: { type?: string; status?: string; date_from?: string; date_to?: string; page?: number }): Promise<any[]> {
   if (USE_MOCK) {
@@ -260,7 +260,7 @@ export async function caGetHistory(filters?: { type?: string; status?: string; d
   return apiGet(`/company-admin/history?${qs.toString()}`);
 }
 
-// ─── Settings ─────────────────────────────────────────────────────────────────
+// --- Settings ----
 
 let _mockCompany = { ...MOCK_COMPANY };
 

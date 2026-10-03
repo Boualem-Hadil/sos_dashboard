@@ -12,7 +12,7 @@ const INPUT = {
   borderRadius: '10px', padding: '10px 14px', width: '100%', fontSize: '14px', outline: 'none',
 } as const;
 
-// ── Edit Modal ─────────────────────────────────────────────────────────────────
+// -- Edit Modal ----
 function EditOfficerModal({ officer, onClose, onSaved }: { officer: OfficerUser; onClose: () => void; onSaved: (o: OfficerUser) => void }) {
   const { addToast } = useEmergency();
   const [form, setForm] = useState({ full_name: officer.full_name, phone: officer.phone || '', employee_id: officer.employee_id });
@@ -77,7 +77,7 @@ function EditOfficerModal({ officer, onClose, onSaved }: { officer: OfficerUser;
   );
 }
 
-// ── Temp Password Modal ────────────────────────────────────────────────────────
+// -- Temp Password Modal ----
 function TempPasswordModal({ name, password, onClose }: { name: string; password: string; onClose: () => void }) {
   const [visible, setVisible] = useState(false);
   return (
@@ -115,7 +115,7 @@ function TempPasswordModal({ name, password, onClose }: { name: string; password
   );
 }
 
-// ── Main page ──────────────────────────────────────────────────────────────────
+// -- Main page ----
 export default function OfficersPage() {
   const { addToast } = useEmergency();
   const [officers, setOfficers] = useState<OfficerUser[]>([]);

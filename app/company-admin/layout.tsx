@@ -7,7 +7,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { useEmergency } from '@/context/EmergencyContext';
 import { getAuth } from '@/lib/auth';
 
-// ── Toast re-used from the existing context ────────────────────────────────────
+// -- Toast re-used from the existing context ----
 function ToastContainer() {
   const { toasts, removeToast } = useEmergency();
   return (

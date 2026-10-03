@@ -10,7 +10,11 @@ export const metadata: Metadata = {
   title: 'EchoAlert — Tableau de bord sécurité',
   description: 'Plateforme B2B de gestion des urgences industrielles pour les entreprises algériennes.',
   icons: {
-    icon: '/logo-icon.png',
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/logo-icon.png', type: 'image/png', sizes: '512x512' },
+    ],
+    shortcut: '/favicon.ico',
     apple: '/logo-icon.png',
   },
 };

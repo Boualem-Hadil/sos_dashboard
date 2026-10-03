@@ -155,7 +155,7 @@ export interface NearbyWorker {
   longitude: number | null;
 }
 
-// ─── Company Admin ────────────────────────────────────────────────────────────
+// --- Company Admin ----
 
 export interface CompanyAdminStats {
   total_officers: number;

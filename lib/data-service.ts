@@ -15,7 +15,7 @@ import {
 // Read the flag once
 const USE_MOCK = false; // process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 
-// ── Workers ───────────────────────────────────────────────────────────────────
+// -- Workers ----
 export async function getWorkers() {
     if (USE_MOCK) {
         // Simulate network delay so UI behavior is realistic
@@ -69,7 +69,7 @@ export async function getWorkers() {
     });
 }
 
-// ── Emergencies ───────────────────────────────────────────────────────────────
+// -- Emergencies ----
 export async function getEmergencies(filters?: {
     type?: string;
     status?: string;
@@ -106,7 +106,7 @@ export async function getEmergencies(filters?: {
     return items;
 }
 
-// ── Active emergency (live) ───────────────────────────────────────────────────
+// -- Active emergency (live) ----
 export async function getActiveEmergency() {
     if (USE_MOCK) {
         await delay(200);
@@ -120,7 +120,7 @@ export async function getActiveEmergency() {
     return response.data.items[0] || null;
 }
 
-// ── Company stats ─────────────────────────────────────────────────────────────
+// -- Company stats ----
 export async function getCompanyStats(companyId: string) {
     if (USE_MOCK) {
         await delay(200);
@@ -132,7 +132,7 @@ export async function getCompanyStats(companyId: string) {
     return response.data;
 }
 
-// ── Resolve emergency ─────────────────────────────────────────────────────────
+// -- Resolve emergency ----
 export async function resolveEmergency(
     id: string,
     status: 'resolved' | 'false_alarm'
@@ -148,7 +148,7 @@ export async function resolveEmergency(
     return response.data;
 }
 
-// ── Helper ────────────────────────────────────────────────────────────────────
+// -- Helper ----
 function delay(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
