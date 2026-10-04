@@ -19,14 +19,14 @@ const STATUS_STYLES: Record<string, { color: string; bg: string; pulse?: boolean
 
 import { getEmergencies } from '@/lib/data-service';
 
-function WorkerSidePanel({ 
-  worker, 
+function WorkerSidePanel({
+  worker,
   onClose,
   onEditProfile,
   onEditMedical,
   onDelete
-}: { 
-  worker: Worker; 
+}: {
+  worker: Worker;
   onClose: () => void;
   onEditProfile: () => void;
   onEditMedical: () => void;
@@ -34,10 +34,10 @@ function WorkerSidePanel({
 }) {
   const [history, setHistory] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
-  
-  // Only admins and officers can edit/delete
+
   const auth = getAuth();
-  const canManage = auth?.role === 'super_admin' || auth?.role === 'company_admin' || auth?.role === 'safety_officer';
+  const canEdit = auth?.role === 'super_admin' || auth?.role === 'company_admin' || auth?.role === 'safety_officer';
+  const canDeactivate = auth?.role === 'super_admin' || auth?.role === 'company_admin';
 
   React.useEffect(() => {
     let mounted = true;
@@ -88,23 +88,27 @@ function WorkerSidePanel({
           </div>
         </div>
 
-        {/* Action Buttons (Admin/Officer only) */}
-        {canManage && (
+        {/* Action Buttons */}
+        {(canEdit || canDeactivate) && (
           <div className="flex gap-2 mb-5">
-            <button 
+            {canEdit && (
+            <button
               onClick={onEditProfile}
               className="flex-1 py-2 text-xs font-bold rounded-lg border flex items-center justify-center gap-2 hover:bg-white/5 transition-colors"
               style={{ borderColor: 'var(--sos-border)', color: 'var(--sos-text-primary)' }}
             >
               Modifier Profil
             </button>
-            <button 
+            )}
+            {canDeactivate && (
+            <button
               onClick={onDelete}
               className="flex-1 py-2 text-xs font-bold rounded-lg border flex items-center justify-center gap-2 hover:opacity-80 transition-opacity"
               style={{ borderColor: '#E5393540', color: '#EF5350', background: 'rgba(229,57,53,0.1)' }}
             >
               Désactiver
             </button>
+            )}
           </div>
         )}
 
@@ -129,10 +133,10 @@ function WorkerSidePanel({
         <div className="p-4 rounded-xl border relative" style={{ background: 'var(--sos-bg-surface-2)', borderColor: 'var(--sos-border)' }}>
           <div className="flex justify-between items-center mb-3">
             <div className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--sos-text-muted)' }}>Profil Médical</div>
-            {canManage && (
-              <button 
+            {canEdit && (
+              <button
                 onClick={onEditMedical}
-                className="text-xs font-bold hover:underline" 
+                className="text-xs font-bold hover:underline"
                 style={{ color: '#2196F3' }}
               >
                 Modifier
@@ -199,7 +203,7 @@ function WorkerSidePanel({
                   </div>
                   {em.responder_type && (
                     <div className="text-xs mb-1" style={{ color: 'var(--sos-text-secondary)' }}>
-                      Intervenant: <span className="font-semibold capitalize">{em.responder_type}</span> 
+                      Intervenant: <span className="font-semibold capitalize">{em.responder_type}</span>
                       {em.eta_minutes ? ` (${em.eta_minutes} min)` : ''}
                     </div>
                   )}
@@ -273,10 +277,10 @@ export default function WorkersPage() {
           <button
             id="btn-add-worker"
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-white transition-all hover:opacity-90"
-            style={{ 
-              background: company.currentWorkers >= company.maxWorkers ? 'var(--sos-border)' : 'var(--sos-accent)', 
+            style={{
+              background: company.currentWorkers >= company.maxWorkers ? 'var(--sos-border)' : 'var(--sos-accent)',
               color: company.currentWorkers >= company.maxWorkers ? 'var(--sos-text-muted)' : '#fff',
-              cursor: company.currentWorkers >= company.maxWorkers ? 'not-allowed' : 'pointer' 
+              cursor: company.currentWorkers >= company.maxWorkers ? 'not-allowed' : 'pointer'
             }}
             disabled={company.currentWorkers >= company.maxWorkers}
             title={company.currentWorkers >= company.maxWorkers ? 'Limite atteinte. Contactez le support pour upgrade.' : ''}
@@ -370,9 +374,9 @@ export default function WorkersPage() {
               className="fixed inset-0 bg-black/50 z-30 backdrop-blur-sm"
               onClick={() => setSelected(null)}
             />
-            <WorkerSidePanel 
-              worker={selected} 
-              onClose={() => setSelected(null)} 
+            <WorkerSidePanel
+              worker={selected}
+              onClose={() => setSelected(null)}
               onEditProfile={() => setShowEditModal(true)}
               onEditMedical={() => setShowEditMedicalModal(true)}
               onDelete={() => handleDelete(selected)}
@@ -385,17 +389,17 @@ export default function WorkersPage() {
         )}
 
         {showEditModal && selected && (
-          <EditWorkerModal 
-            worker={selected} 
-            onClose={() => setShowEditModal(false)} 
+          <EditWorkerModal
+            worker={selected}
+            onClose={() => setShowEditModal(false)}
             onSuccess={(updated) => setSelected(updated)}
           />
         )}
 
         {showEditMedicalModal && selected && (
-          <EditMedicalModal 
-            worker={selected} 
-            onClose={() => setShowEditMedicalModal(false)} 
+          <EditMedicalModal
+            worker={selected}
+            onClose={() => setShowEditMedicalModal(false)}
           />
         )}
       </AnimatePresence>

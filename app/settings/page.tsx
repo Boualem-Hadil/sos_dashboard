@@ -12,6 +12,12 @@ export default function SettingsPage() {
   const [notifs, setNotifs] = useState({ sound: true, email: true, browser: true });
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isReadOnly, setIsReadOnly] = useState(false);
+
+  useEffect(() => {
+    const auth = getAuth();
+    setIsReadOnly(auth?.role === 'safety_officer');
+  }, []);
 
   useEffect(() => {
     async function loadCompany() {
@@ -96,14 +102,30 @@ export default function SettingsPage() {
           <p className="text-sm mt-1" style={{ color: 'var(--sos-text-secondary)' }}>Configuration de la plateforme</p>
         </div>
 
-        <Section icon={Building2} title="Informations Entreprise">
-          <div className="flex flex-col gap-4">
-            <Field label="Nom de l'entreprise" value={companyForm.name} onChange={v => setCompanyForm(f => ({ ...f, name: v }))} />
-            <Field label="Secteur d'activité" value={companyForm.industry} onChange={v => setCompanyForm(f => ({ ...f, industry: v }))} />
-            <Field label="Email de contact" value={companyForm.contact_email} onChange={v => setCompanyForm(f => ({ ...f, contact_email: v }))} />
-            <Field label="Code entreprise" value={company.company_code} disabled />
+        <div className="rounded-xl overflow-hidden border" style={{ background: 'var(--sos-bg-surface)', borderColor: 'var(--sos-border)', boxShadow: 'var(--sos-shadow)' }}>
+          <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--sos-border)' }}>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(229,57,53,0.15)' }}>
+                <Building2 className="w-4 h-4" style={{ color: '#E53935' }} />
+              </div>
+              <h2 className="text-base font-bold" style={{ color: 'var(--sos-text-primary)' }}>Informations Entreprise</h2>
+            </div>
+            {isReadOnly && (
+              <span className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg"
+                style={{ background: 'rgba(14,165,233,0.1)', border: '1px solid rgba(14,165,233,0.25)', color: '#38BDF8' }}>
+                🔒 Lecture seule
+              </span>
+            )}
           </div>
-        </Section>
+          <div className="p-6">
+            <div className="flex flex-col gap-4">
+              <Field label="Nom de l'entreprise" value={companyForm.name} onChange={isReadOnly ? undefined : v => setCompanyForm(f => ({ ...f, name: v }))} disabled={isReadOnly} />
+              <Field label="Secteur d'activité" value={companyForm.industry} onChange={isReadOnly ? undefined : v => setCompanyForm(f => ({ ...f, industry: v }))} disabled={isReadOnly} />
+              <Field label="Email de contact" value={companyForm.contact_email} onChange={isReadOnly ? undefined : v => setCompanyForm(f => ({ ...f, contact_email: v }))} disabled={isReadOnly} />
+              <Field label="Code entreprise" value={company.company_code} disabled />
+            </div>
+          </div>
+        </div>
 
         <Section icon={PhoneCall} title="Numéro d'Urgence (Fallback)">
           <div className="flex flex-col gap-4">
@@ -171,10 +193,12 @@ export default function SettingsPage() {
           </div>
         </Section>
 
-        <button onClick={handleSave} className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-white self-start transition-all"
-          style={{ background: saved ? '#4CAF50' : '#E53935', boxShadow: '0 4px 20px rgba(229,57,53,0.3)' }}>
-          <Save className="w-4 h-4" /> {saved ? 'Sauvegardé ✓' : 'Sauvegarder les modifications'}
-        </button>
+        {!isReadOnly && (
+          <button onClick={handleSave} className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-white self-start transition-all"
+            style={{ background: saved ? '#4CAF50' : '#E53935', boxShadow: '0 4px 20px rgba(229,57,53,0.3)' }}>
+            <Save className="w-4 h-4" /> {saved ? 'Sauvegardé ✓' : 'Sauvegarder les modifications'}
+          </button>
+        )}
       </div>
     </DashboardLayout>
   );
