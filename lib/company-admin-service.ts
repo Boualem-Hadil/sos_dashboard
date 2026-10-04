@@ -170,7 +170,7 @@ export async function caGetWorkers(department?: string, includeInactive = false)
     const { WORKERS } = await import('./mock-data');
     let ws = WORKERS.filter(w => w.companyId === 'sonatrach');
     if (department) ws = ws.filter(w => w.department === department);
-    if (!includeInactive) ws = ws.filter(w => w.is_active !== false);
+    if (!includeInactive) ws = ws.filter(w => (w as any).is_active !== false);
     return ws;
   }
   const qs = new URLSearchParams();
