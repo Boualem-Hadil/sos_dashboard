@@ -1,7 +1,7 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { LogOut, Bell, User, Sun, Moon } from 'lucide-react';
+import { LogOut, User, Sun, Moon } from 'lucide-react';
 import { logout, getAuth } from '@/lib/auth';
 import { useEmergency } from '@/context/EmergencyContext';
 import { useTheme } from '@/context/ThemeContext';
@@ -59,23 +59,6 @@ export function Navbar() {
             : <Moon className="w-4 h-4" style={{ color: 'var(--sos-text-secondary)' }} />}
         </button>
 
-        {/* Bell */}
-        <div className="relative">
-          <button
-            className="w-9 h-9 rounded-lg flex items-center justify-center transition-all hover:scale-105"
-            style={{ background: 'var(--sos-bg-hover)', border: '1px solid var(--sos-border)' }}
-          >
-            <Bell className="w-4 h-4" style={{ color: 'var(--sos-text-muted)' }} />
-          </button>
-          {liveCount > 0 && (
-            <span
-              className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-white badge-pulse"
-              style={{ background: 'var(--sos-accent)', fontSize: '10px', fontWeight: 700 }}
-            >
-              {liveCount}
-            </span>
-          )}
-        </div>
 
         {/* Divider */}
         <div className="w-px h-6" style={{ background: 'var(--sos-border)' }} />
