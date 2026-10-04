@@ -164,16 +164,29 @@ export async function caResetPassword(id: string): Promise<{ temp_password: stri
 
 // --- Workers (read-only) ----
 
-export async function caGetWorkers(department?: string): Promise<any[]> {
+export async function caGetWorkers(department?: string, includeInactive = false): Promise<any[]> {
   if (USE_MOCK) {
     await delay(300);
     const { WORKERS } = await import('./mock-data');
     let ws = WORKERS.filter(w => w.companyId === 'sonatrach');
     if (department) ws = ws.filter(w => w.department === department);
+    if (!includeInactive) ws = ws.filter(w => w.status !== 'inactive' && w.is_active !== false);
     return ws;
   }
-  const qs = department ? `?department=${encodeURIComponent(department)}` : '';
-  return apiGet(`/company-admin/workers${qs}`);
+  const qs = new URLSearchParams();
+  if (department) qs.set('department', department);
+  if (includeInactive) qs.set('include_inactive', 'true');
+  return apiGet(`/company-admin/workers?${qs.toString()}`);
+}
+
+export async function caDeactivateWorker(id: string): Promise<void> {
+  if (USE_MOCK) { await delay(400); return; }
+  await apiDelete(`/users/${id}`);
+}
+
+export async function caReactivateWorker(id: string): Promise<void> {
+  if (USE_MOCK) { await delay(400); return; }
+  await apiPatch(`/users/${id}/reactivate`);
 }
 
 // --- Departments ----
