@@ -22,6 +22,11 @@ export default function LoginPage() {
       setLoading(false);
       return;
     }
+    if (user.role === 'worker') {
+      setError('Accès refusé. Les travailleurs ne sont pas autorisés à accéder au tableau de bord.');
+      setLoading(false);
+      return;
+    }
     try {
       saveAuth(user);
       // Hard redirect to force EmergencyContext to remount and load fresh data

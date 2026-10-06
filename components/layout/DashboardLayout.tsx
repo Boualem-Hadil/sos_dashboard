@@ -236,7 +236,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const user = getAuth();
     if (user) {
-      if (user.role === 'super_admin') {
+      if (user.role === 'worker') {
+        router.push('/login');
+      } else if (user.role === 'super_admin') {
         router.push('/admin');
       } else if (user.role === 'company_admin') {
         router.push('/company-admin');
