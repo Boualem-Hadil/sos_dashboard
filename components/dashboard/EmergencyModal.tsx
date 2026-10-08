@@ -37,6 +37,7 @@ export function EmergencyModal() {
   // -- Ping state ----
   const [isSendingPing, setIsSendingPing] = useState(false);
   const [pingCooldownLeft, setPingCooldownLeft] = useState(0); // seconds remaining in cooldown
+  const [pingError, setPingError] = useState<string | null>(null);
   const pingTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // -- Nearby workers state ----
@@ -175,6 +176,7 @@ export function EmergencyModal() {
       setNearbyWorkers([]);
       setNearbyError(null);
       setPingCooldownLeft(0);
+      setPingError(null);
       setResponderType(undefined);
       setEtaMinutes('');
       setResolutionNotes('');
@@ -219,6 +221,7 @@ export function EmergencyModal() {
   const handleSendPing = async () => {
     if (isSendingPing || pingCooldownLeft > 0) return;
     setIsSendingPing(true);
+    setPingError(null);
     try {
       const token = getToken();
       if (!token) throw new Error('No token');
@@ -226,7 +229,8 @@ export function EmergencyModal() {
       addToast({ type: 'info', title: '🔔 Ping envoyé', message: 'Le travailleur a 10 secondes pour répondre.' });
       // Cooldown: 10 s so officer can quickly re-ping if needed
       setPingCooldownLeft(10);
-    } catch {
+    } catch (err: any) {
+      setPingError(err?.message || 'Erreur réseau: Ping non envoyé. Vérifiez votre connexion.');
       addToast({ type: 'error', title: 'Erreur', message: 'Impossible d\'envoyer le ping.' });
     } finally {
       setIsSendingPing(false);
@@ -698,6 +702,12 @@ export function EmergencyModal() {
                   </div>
                 )}
 
+                {pingError && (
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold animate-pulse" style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.5)', color: '#ef4444' }}>
+                    ⚠️ {pingError}
+                  </div>
+                )}
+
                 <button
                   onClick={handleFindNearby}
                   disabled={isLoadingNearby}
@@ -736,7 +746,7 @@ export function EmergencyModal() {
                     <input
                       type="number"
                       min="0"
-                      placeholder="Ex: 15"
+                      placeholder="Ex: 15 min"
                       value={etaMinutes}
                       onChange={(e) => setEtaMinutes(e.target.value === '' ? '' : parseInt(e.target.value))}
                       className="w-full p-2 border rounded"
@@ -766,7 +776,7 @@ export function EmergencyModal() {
                     <PhoneCall className="w-5 h-5" /> Pompiers (14)
                   </a>
                   <a href="tel:14" className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-5 py-3 rounded-xl font-bold transition-colors text-base shadow-lg shadow-blue-900/20">
-                    <PhoneCall className="w-5 h-5" /> SAMU (14)
+                    <PhoneCall className="w-5 h-5" /> SAMU (16)
                   </a>
                   <a href="tel:17" className="flex items-center gap-2 bg-blue-800 hover:bg-blue-900 text-white px-5 py-3 rounded-xl font-bold transition-colors text-base shadow-lg shadow-blue-900/20">
                     <PhoneCall className="w-5 h-5" /> Police (17)
