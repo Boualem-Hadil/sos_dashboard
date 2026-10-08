@@ -5,6 +5,9 @@ import { X, UserPlus, Eye, EyeOff } from 'lucide-react';
 import { useEmergency } from '@/context/EmergencyContext';
 import type { AddWorkerPayload } from '@/context/EmergencyContext';
 import { getAuth } from '@/lib/auth';
+import { caGetDepartments } from '@/lib/company-admin-service';
+import type { Department } from '@/types';
+import { useEffect } from 'react';
 
 interface Props {
   onClose: () => void;
@@ -65,6 +68,15 @@ export function AddWorkerModal({ onClose, onSuccess }: Props) {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  const [departments, setDepartments] = useState<Department[]>([]);
+
+  useEffect(() => {
+    caGetDepartments().then(setDepartments).catch(console.error);
+  }, []);
+
+  const selectedDept = departments.find(d => d.id === form.department);
+  const unitsForDept = selectedDept?.units || [];
 
   const set = (key: keyof AddWorkerPayload) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setForm(f => ({ ...f, [key]: e.target.value }));
@@ -177,27 +189,38 @@ export function AddWorkerModal({ onClose, onSuccess }: Props) {
               </div>
             </div>
 
-            {/* Row: unit + department */}
+            {/* Row: department + unit */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label style={LABEL_STYLE}>Unité</label>
-                <input
-                  id="add-worker-unit"
-                  style={INPUT_STYLE}
-                  placeholder="ex. Forage Alpha"
-                  value={form.unit}
-                  onChange={set('unit')}
-                />
+                <label style={LABEL_STYLE}>Département</label>
+                <select
+                  id="add-worker-dept"
+                  style={{ ...INPUT_STYLE, cursor: 'pointer' }}
+                  value={form.department || ''}
+                  onChange={(e) => {
+                    setForm(f => ({ ...f, department: e.target.value, unit: '' }));
+                  }}
+                >
+                  <option value="">-- Aucun --</option>
+                  {departments.map(d => (
+                    <option key={d.id} value={d.id}>{d.name}</option>
+                  ))}
+                </select>
               </div>
               <div>
-                <label style={LABEL_STYLE}>Département</label>
-                <input
-                  id="add-worker-dept"
-                  style={INPUT_STYLE}
-                  placeholder="ex. Opérations"
-                  value={form.department}
-                  onChange={set('department')}
-                />
+                <label style={LABEL_STYLE}>Unité</label>
+                <select
+                  id="add-worker-unit"
+                  style={{ ...INPUT_STYLE, cursor: 'pointer' }}
+                  value={form.unit || ''}
+                  onChange={set('unit')}
+                  disabled={!form.department}
+                >
+                  <option value="">-- Aucune --</option>
+                  {unitsForDept.map(u => (
+                    <option key={u.id} value={u.id}>{u.name}</option>
+                  ))}
+                </select>
               </div>
             </div>
 

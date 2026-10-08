@@ -41,6 +41,8 @@ export interface Worker {
   lastName: string;
   unit: string;
   department: string;
+  unitId?: string;
+  departmentId?: string;
   position: string;
   phone: string;
   status: WorkerStatus;
