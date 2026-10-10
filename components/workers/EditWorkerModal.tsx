@@ -6,6 +6,9 @@ import { useEmergency } from '@/context/EmergencyContext';
 import type { UpdateWorkerPayload } from '@/context/EmergencyContext';
 import type { Worker } from '@/types';
 import { getAuth } from '@/lib/auth';
+import { caGetDepartments } from '@/lib/company-admin-service';
+import type { Department } from '@/types';
+import { useEffect } from 'react';
 
 interface Props {
   worker: Worker;
@@ -55,10 +58,19 @@ export function EditWorkerModal({ worker, onClose, onSuccess }: Props) {
     fullName: `${worker.firstName} ${worker.lastName}`.trim(),
     employeeId: worker.employeeId,
     phone: worker.phone === 'Non spécifié' ? '' : worker.phone,
-    unit: worker.unit === 'Unité non spécifiée' ? '' : worker.unit,
-    department: worker.department === 'Département non spécifié' ? '' : worker.department,
-    position: worker.position === 'Poste non spécifié' ? '' : worker.position,
+    unit: worker.unitId || '',
+    department: worker.departmentId || '',
+    position: worker.position === 'Poste non spécifié' || worker.position === 'Non assigné' ? '' : worker.position,
   });
+
+  const [departments, setDepartments] = useState<Department[]>([]);
+
+  useEffect(() => {
+    caGetDepartments().then(setDepartments).catch(console.error);
+  }, []);
+
+  const selectedDept = departments.find(d => d.id === form.department);
+  const unitsForDept = selectedDept?.units || [];
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -170,25 +182,38 @@ export function EditWorkerModal({ worker, onClose, onSuccess }: Props) {
               </div>
             </div>
 
-            {/* Unit + department */}
+            {/* Row: department + unit */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label style={LABEL_STYLE}>Unité</label>
-                <input
-                  id="edit-worker-unit"
-                  style={INPUT_STYLE}
-                  value={form.unit}
-                  onChange={set('unit')}
-                />
+                <label style={LABEL_STYLE}>Département</label>
+                <select
+                  id="edit-worker-dept"
+                  style={{ ...INPUT_STYLE, cursor: 'pointer' }}
+                  value={form.department || ''}
+                  onChange={(e) => {
+                    setForm(f => ({ ...f, department: e.target.value, unit: '' }));
+                  }}
+                >
+                  <option value="">-- Aucun --</option>
+                  {departments.map(d => (
+                    <option key={d.id} value={d.id}>{d.name}</option>
+                  ))}
+                </select>
               </div>
               <div>
-                <label style={LABEL_STYLE}>Département</label>
-                <input
-                  id="edit-worker-dept"
-                  style={INPUT_STYLE}
-                  value={form.department}
-                  onChange={set('department')}
-                />
+                <label style={LABEL_STYLE}>Unité</label>
+                <select
+                  id="edit-worker-unit"
+                  style={{ ...INPUT_STYLE, cursor: 'pointer' }}
+                  value={form.unit || ''}
+                  onChange={set('unit')}
+                  disabled={!form.department}
+                >
+                  <option value="">-- Aucune --</option>
+                  {unitsForDept.map(u => (
+                    <option key={u.id} value={u.id}>{u.name}</option>
+                  ))}
+                </select>
               </div>
             </div>
 

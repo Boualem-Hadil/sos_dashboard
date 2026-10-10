@@ -64,15 +64,15 @@ export function Sidebar() {
                   className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150"
                   style={active
                     ? {
-                        background: 'var(--sos-sidebar-active-bg)',
-                        color: 'var(--sos-accent)',
-                        borderLeft: '2px solid var(--sos-accent)',
-                        paddingLeft: '10px',
-                      }
+                      background: 'var(--sos-sidebar-active-bg)',
+                      color: 'var(--sos-accent)',
+                      borderLeft: '2px solid var(--sos-accent)',
+                      paddingLeft: '10px',
+                    }
                     : {
-                        color: 'var(--sos-sidebar-text)',
-                        borderLeft: '2px solid transparent',
-                      }
+                      color: 'var(--sos-sidebar-text)',
+                      borderLeft: '2px solid transparent',
+                    }
                   }
                 >
                   <Icon className="w-4 h-4 flex-shrink-0" />
@@ -104,8 +104,8 @@ export function Sidebar() {
 
       {/* Footer */}
       <div className="px-5 py-4" style={{ borderTop: '1px solid var(--sos-sidebar-border)' }}>
-        <div className="text-xs" style={{ color: 'var(--sos-sidebar-text)', opacity: 0.7 }}>EchoAlert v2.0</div>
-        <div className="text-xs" style={{ color: 'var(--sos-sidebar-text)', opacity: 0.4 }}>© 2025 Tous droits réservés</div>
+        <div className="text-xs" style={{ color: 'var(--sos-sidebar-text)', opacity: 0.7 }}>EchoAlert </div>
+        <div className="text-xs" style={{ color: 'var(--sos-sidebar-text)', opacity: 0.4 }}>© 2026 Tous droits réservés</div>
       </div>
     </aside>
   );
