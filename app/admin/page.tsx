@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import {
   LayoutDashboard, Building2, ShieldCheck, Bell, Plus, Pencil, Trash2,
   X, ChevronRight, AlertTriangle, CheckCircle, Clock, Users, Activity,
@@ -778,8 +779,8 @@ export default function AdminPage() {
       <header className="h-16 flex items-center justify-between px-6 flex-shrink-0 sticky top-0 z-30"
         style={{ background: 'var(--sos-bg-surface)', borderBottom: '1px solid var(--sos-border)', boxShadow: 'var(--sos-shadow)' }}>
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#6366F1,#4F46E5)' }}>
-            <Shield className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 flex items-center justify-center relative">
+            <Image src="/logo_transparent.png" alt="EchoAlert" fill style={{ objectFit: 'contain' }} priority />
           </div>
           <div>
             <div className="font-bold text-sm" style={{ color: 'var(--sos-text-primary)' }}>Super Admin Panel</div>

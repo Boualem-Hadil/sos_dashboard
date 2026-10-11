@@ -32,8 +32,8 @@ export function Navbar() {
     >
       <div className="flex items-center gap-3">
         <Image
-          src={theme === 'dark' ? '/logo-dark.png' : '/logo-light.png'}
-          alt="EchoAlert"
+          src="/Sonatrach.svg.webp"
+          alt="Sonatrach"
           width={180}
           height={60}
           priority

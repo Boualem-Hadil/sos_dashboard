@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { ShieldAlert, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { login, saveAuth } from '@/lib/auth';
 
@@ -50,10 +51,7 @@ export default function LoginPage() {
         <div className="rounded-2xl p-8 shadow-2xl border" style={{ background: 'var(--sos-bg-surface)', borderColor: 'var(--sos-border)' }}>
           {/* Logo */}
           <div className="flex flex-col items-center mb-8">
-            <div className="w-20 h-20 rounded-2xl flex items-center justify-center mb-4 shadow-lg" style={{ background: 'linear-gradient(135deg, #E53935, #B71C1C)', boxShadow: '0 8px 30px rgba(229,57,53,0.3)' }}>
-              <ShieldAlert className="w-10 h-10 text-white" />
-            </div>
-            <h1 className="text-3xl font-black tracking-tight" style={{ color: '#E53935' }}>EchoAlert</h1>
+            <Image src="/logo_transparent.png" alt="EchoAlert" width={140} height={140} style={{ objectFit: 'contain', marginBottom: '16px' }} priority />
             <p className="text-sm mt-1" style={{ color: 'var(--sos-text-secondary)' }}>Plateforme de sécurité surveillance</p>
           </div>
 
@@ -66,7 +64,7 @@ export default function LoginPage() {
                 type="text"
                 value={form.employeeId}
                 onChange={e => setForm(f => ({ ...f, employeeId: e.target.value }))}
-                placeholder="ex: SN-001"
+                placeholder="ex: SON-001"
                 required
                 className="w-full px-4 py-3 rounded-xl outline-none transition-all"
                 style={{ background: 'var(--sos-bg-surface-2)', border: '1px solid var(--sos-border)', color: 'var(--sos-text-primary)' }}
@@ -105,14 +103,13 @@ export default function LoginPage() {
                 type="text"
                 value={form.companyCode}
                 onChange={e => setForm(f => ({ ...f, companyCode: e.target.value.toUpperCase() }))}
-                placeholder="ex: SONATRACH-2024, COSIDER-2024..."
+                placeholder="ex: SONATRACH-2026, COSIDER-2024..."
                 required
                 className="w-full px-4 py-3 rounded-xl outline-none transition-all font-mono"
                 style={{ background: 'var(--sos-bg-surface-2)', border: '1px solid var(--sos-border)', color: 'var(--sos-text-primary)' }}
                 onFocus={e => e.target.style.borderColor = '#E53935'}
                 onBlur={e => e.target.style.borderColor = 'var(--sos-border)'}
               />
-              <p className="text-xs mt-1" style={{ color: 'var(--sos-text-muted)' }}>Codes: SNTR · CVTL · ARCL · SUPER-ADMIN</p>
             </div>
 
             {error && (
