@@ -34,8 +34,8 @@ export function Navbar() {
         <Image
           src="/Sonatrach.svg.webp"
           alt="Sonatrach"
-          width={180}
-          height={60}
+          width={200}
+          height={80}
           priority
           style={{ objectFit: 'contain', width: 'auto', height: 'auto', maxHeight: '48px' }}
         />
