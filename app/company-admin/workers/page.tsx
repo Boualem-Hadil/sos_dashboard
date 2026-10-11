@@ -106,7 +106,7 @@ export default function WorkersPage() {
         <table className="w-full text-sm">
           <thead>
             <tr style={{ borderBottom: '1px solid var(--sos-border)' }}>
-              {['', 'Nom', 'ID', 'Département / Unité', 'Poste', 'Statut', 'Actions'].map(h => (
+              {['', 'Nom', 'ID', 'Département / Unité', 'Statut', 'Actions'].map(h => (
                 <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--sos-text-muted)' }}>{h}</th>
               ))}
             </tr>
@@ -125,13 +125,12 @@ export default function WorkersPage() {
                     <Users className="w-4 h-4 text-gray-400" />
                   </div>
                 </td>
-                <td className="px-4 py-3 font-medium text-white">{w.full_name}</td>
-                <td className="px-4 py-3 font-mono text-xs text-gray-400">{w.employee_id}</td>
+                <td className="px-4 py-3 font-medium" style={{ color: 'var(--sos-text-primary)' }}>{w.full_name}</td>
+                <td className="px-4 py-3 font-mono text-xs" style={{ color: 'var(--sos-text-muted)' }}>{w.employee_id}</td>
                 <td className="px-4 py-3">
-                  <div className="text-sm text-gray-300">{w.department || '—'}</div>
-                  <div className="text-xs text-gray-500">{w.unit || '—'}</div>
+                  <div className="text-sm" style={{ color: 'var(--sos-text-primary)' }}>{w.department || '—'}</div>
+                  <div className="text-xs" style={{ color: 'var(--sos-text-muted)' }}>{w.unit || '—'}</div>
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-400">{w.position || '—'}</td>
                 <td className="px-4 py-3">
                   <span className="px-2 py-1 rounded-full text-xs font-bold"
                     style={{ background: w.is_active ? 'rgba(16,185,129,0.1)' : 'rgba(107,114,128,0.1)', color: w.is_active ? '#10B981' : '#6B7280' }}>

@@ -611,7 +611,7 @@ export function EmergencyModal() {
                                 style={{ background: 'var(--sos-bg-surface)', border: '1px solid var(--sos-border)' }}
                               >
                                 <div className="flex items-center gap-3">
-                                  <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm text-white" style={{ background: i === 0 ? '#F59E0B' : 'rgba(245,158,11,0.4)' }}>
+                                  <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm text-white" style={{ background: i === 0 ? '#F59E0B' : '#B45309' }}>
                                     {i + 1}
                                   </div>
                                   <div>

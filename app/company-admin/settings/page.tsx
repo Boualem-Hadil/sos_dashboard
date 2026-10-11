@@ -90,13 +90,13 @@ export default function SettingsPage() {
         {/* Capacity & Info */}
         <div className="flex flex-col gap-4">
           <div className="rounded-xl p-5" style={{ background: 'var(--sos-bg-surface)', border: '1px solid var(--sos-border)' }}>
-            <h3 className="text-sm font-bold text-white mb-4 uppercase tracking-widest text-center">Capacité (Licences)</h3>
-            <div className="relative h-4 rounded-full overflow-hidden bg-gray-900 mb-2">
+            <h3 className="text-sm font-bold mb-4 uppercase tracking-widest text-center" style={{ color: 'var(--sos-text-primary)' }}>Capacité (Licences)</h3>
+            <div className="relative h-4 rounded-full overflow-hidden mb-2" style={{ background: 'var(--sos-bg-hover)' }}>
               <div className="absolute left-0 top-0 bottom-0 transition-all duration-1000" style={{ width: `${Math.min(100, pct)}%`, background: pct > 90 ? '#EF4444' : pct > 75 ? '#F59E0B' : '#10B981' }} />
             </div>
             <div className="flex justify-between text-xs font-mono mb-4">
-              <span className="text-gray-400">{settings.current_users} utilisés</span>
-              <span className="font-bold text-white">{settings.max_users} max</span>
+              <span style={{ color: 'var(--sos-text-muted)' }}>{settings.current_users} utilisés</span>
+              <span className="font-bold" style={{ color: 'var(--sos-text-primary)' }}>{settings.max_users} max</span>
             </div>
             {pct >= 90 && (
               <div className="flex gap-2 p-3 rounded-lg text-xs" style={{ background: 'rgba(239,68,68,0.1)', color: '#FCA5A5', border: '1px solid rgba(239,68,68,0.2)' }}>
@@ -107,14 +107,14 @@ export default function SettingsPage() {
           </div>
 
           <div className="rounded-xl p-5 flex flex-col gap-3" style={{ background: 'var(--sos-bg-surface)', border: '1px solid var(--sos-border)' }}>
-            <h3 className="text-sm font-bold text-gray-400 mb-2">Informations Système</h3>
+            <h3 className="text-sm font-bold mb-2" style={{ color: 'var(--sos-text-muted)' }}>Informations Système</h3>
             <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-500">Code Entreprise</span>
-              <span className="font-mono font-bold text-sky-400 px-2 py-1 bg-sky-500/10 rounded">{settings.company_code}</span>
+              <span style={{ color: 'var(--sos-text-secondary)' }}>Code Entreprise</span>
+              <span className="font-mono font-bold text-sky-500 px-2 py-1 bg-sky-500/10 rounded">{settings.company_code}</span>
             </div>
             <div className="flex justify-between items-center text-sm mt-2">
-              <span className="text-gray-500">Expiration</span>
-              <span className="font-mono text-gray-300">{settings.subscription_end || 'Illimitée'}</span>
+              <span style={{ color: 'var(--sos-text-secondary)' }}>Expiration</span>
+              <span className="font-mono" style={{ color: 'var(--sos-text-primary)' }}>{settings.subscription_end || 'Illimitée'}</span>
             </div>
           </div>
         </div>

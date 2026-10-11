@@ -94,7 +94,7 @@ function WorkerSidePanel({
             {canEdit && (
             <button
               onClick={onEditProfile}
-              className="flex-1 py-2 text-xs font-bold rounded-lg border flex items-center justify-center gap-2 hover:bg-white/5 transition-colors"
+              className="flex-1 py-2 text-xs font-bold rounded-lg border flex items-center justify-center gap-2 hover:bg-[var(--sos-bg-hover)] transition-colors"
               style={{ borderColor: 'var(--sos-border)', color: 'var(--sos-text-primary)' }}
             >
               Modifier Profil
@@ -117,7 +117,6 @@ function WorkerSidePanel({
           {[
             { label: 'Unité', value: worker.unit },
             { label: 'Département', value: worker.department },
-            { label: 'Poste', value: worker.position },
             { label: 'Téléphone', value: worker.phone },
             { label: 'Dernière activité', value: formatDateTime(worker.lastSeen) },
             { label: 'Date d\'embauche', value: new Date(worker.joinDate).toLocaleDateString('fr-DZ') },
@@ -229,6 +228,9 @@ export default function WorkersPage() {
   const [search, setSearch] = useState('');
   const [unitFilter, setUnitFilter] = useState('');
   const [selected, setSelected] = useState<Worker | null>(null);
+
+  // Keep selected in sync with context workers (e.g. after medical profile update)
+  const selectedFromCtx = selected ? (workers.find(w => w.id === selected.id) ?? selected) : null;
 
   // Modal states
   const [showAddModal, setShowAddModal] = useState(false);
@@ -365,7 +367,7 @@ export default function WorkersPage() {
       </div>
 
       <AnimatePresence>
-        {selected && (
+        {selectedFromCtx && (
           <>
             <motion.div
               initial={{ opacity: 0 }}
@@ -375,11 +377,11 @@ export default function WorkersPage() {
               onClick={() => setSelected(null)}
             />
             <WorkerSidePanel
-              worker={selected}
+              worker={selectedFromCtx}
               onClose={() => setSelected(null)}
               onEditProfile={() => setShowEditModal(true)}
               onEditMedical={() => setShowEditMedicalModal(true)}
-              onDelete={() => handleDelete(selected)}
+              onDelete={() => handleDelete(selectedFromCtx)}
             />
           </>
         )}
@@ -388,17 +390,17 @@ export default function WorkersPage() {
           <AddWorkerModal onClose={() => setShowAddModal(false)} />
         )}
 
-        {showEditModal && selected && (
+        {showEditModal && selectedFromCtx && (
           <EditWorkerModal
-            worker={selected}
+            worker={selectedFromCtx}
             onClose={() => setShowEditModal(false)}
             onSuccess={(updated) => setSelected(updated)}
           />
         )}
 
-        {showEditMedicalModal && selected && (
+        {showEditMedicalModal && selectedFromCtx && (
           <EditMedicalModal
-            worker={selected}
+            worker={selectedFromCtx}
             onClose={() => setShowEditMedicalModal(false)}
           />
         )}

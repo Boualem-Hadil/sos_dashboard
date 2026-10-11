@@ -50,7 +50,6 @@ export async function getWorkers() {
             department: w.department_name || w.department || 'Non assigné',
             unitId: w.unit_id || null,
             departmentId: w.department_id || null,
-            position: w.position || 'Non assigné',
             phone: w.phone || 'N/A',
             lastSeen: w.last_seen || w.lastSeen || new Date().toISOString(),
             joinDate: w.created_at || w.joinDate || new Date().toISOString(),

@@ -82,7 +82,7 @@ export default function HistoryPage() {
         <table className="w-full text-sm">
           <thead>
             <tr style={{ borderBottom: '1px solid var(--sos-border)' }}>
-              {['Date', 'Type', 'Statut', 'Employé', 'Département', 'Durée'].map(h => (
+              {['Date', 'Type', 'Statut', 'Département', 'Durée'].map(h => (
                 <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--sos-text-muted)' }}>{h}</th>
               ))}
             </tr>
@@ -111,8 +111,7 @@ export default function HistoryPage() {
                       {e.status === 'resolved' ? 'Résolue' : 'Fausse alerte'}
                     </span>
                   </td>
-                  <td className="px-4 py-3 font-medium text-white">{e.user?.full_name || '—'}</td>
-                  <td className="px-4 py-3 text-xs" style={{ color: 'var(--sos-text-muted)' }}>{e.department || '—'}</td>
+                  <td className="px-4 py-3 text-xs" style={{ color: 'var(--sos-text-muted)' }}>{e.department_name || e.department || '—'}</td>
                   <td className="px-4 py-3 font-mono text-xs" style={{ color: 'var(--sos-text-secondary)' }}>{dur}</td>
                 </tr>
               );

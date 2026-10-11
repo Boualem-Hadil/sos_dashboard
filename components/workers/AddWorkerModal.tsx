@@ -61,7 +61,6 @@ export function AddWorkerModal({ onClose, onSuccess }: Props) {
     phone: '',
     unit: '',
     department: '',
-    position: '',
     role: roles[0]?.value ?? 'worker',
   });
 
@@ -224,31 +223,19 @@ export function AddWorkerModal({ onClose, onSuccess }: Props) {
               </div>
             </div>
 
-            {/* Row: position + role */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label style={LABEL_STYLE}>Poste</label>
-                <input
-                  id="add-worker-position"
-                  style={INPUT_STYLE}
-                  placeholder="ex. Technicien"
-                  value={form.position}
-                  onChange={set('position')}
-                />
-              </div>
-              <div>
-                <label style={LABEL_STYLE}>Rôle</label>
-                <select
-                  id="add-worker-role"
-                  style={{ ...INPUT_STYLE, cursor: 'pointer' }}
-                  value={form.role}
-                  onChange={set('role')}
-                >
-                  {roles.map(r => (
-                    <option key={r.value} value={r.value}>{r.label}</option>
-                  ))}
-                </select>
-              </div>
+            {/* Row: role */}
+            <div>
+              <label style={LABEL_STYLE}>Rôle</label>
+              <select
+                id="add-worker-role"
+                style={{ ...INPUT_STYLE, cursor: 'pointer' }}
+                value={form.role}
+                onChange={set('role')}
+              >
+                {roles.map(r => (
+                  <option key={r.value} value={r.value}>{r.label}</option>
+                ))}
+              </select>
             </div>
 
             {/* Password */}

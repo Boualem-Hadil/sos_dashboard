@@ -28,7 +28,7 @@ function ToastContainer() {
             onClick={() => removeToast(t.id)}
           >
             <div>
-              <div className="font-semibold text-sm text-white">{t.title}</div>
+              <div className="font-semibold text-sm" style={{ color: 'var(--sos-text-primary)' }}>{t.title}</div>
               <div className="text-xs mt-0.5" style={{ color: 'var(--sos-text-secondary)' }}>{t.message}</div>
             </div>
           </motion.div>
@@ -184,9 +184,8 @@ function SSEInitializer() {
           employeeId: data.employee_id || '',
           firstName: data.full_name ? data.full_name.split(' ')[0] : 'Nouveau',
           lastName: data.full_name ? data.full_name.split(' ').slice(1).join(' ') : 'Travailleur',
-          unit: data.unit || 'Non assignée',
-          department: data.department || 'Non défini',
-          position: data.position || 'Employé',
+          unit: data.unit_name || data.unit || 'Non assignée',
+          department: data.department_name || data.department || 'Non défini',
           phone: data.phone || '',
           status: 'active',
           bloodType: 'Inconnu',

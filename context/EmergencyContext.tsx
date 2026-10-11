@@ -17,7 +17,6 @@ export interface AddWorkerPayload {
   phone?: string;
   unit?: string;
   department?: string;
-  position?: string;
   role?: string;
 }
 
@@ -27,7 +26,6 @@ export interface UpdateWorkerPayload {
   phone?: string;
   unit?: string;
   department?: string;
-  position?: string;
   role?: string;
 }
 
@@ -536,7 +534,6 @@ export function EmergencyProvider({ children }: { children: React.ReactNode }) {
       phone: payload.phone,
       unit_id: payload.unit || null,
       department_id: payload.department || null,
-      position: payload.position,
       role: payload.role,
     }, token);
 
@@ -551,11 +548,10 @@ export function EmergencyProvider({ children }: { children: React.ReactNode }) {
         employeeId: w.employee_id,
         status: w.is_active ? 'active' : 'offline',
         phone: w.phone || 'N/A',
-        unit: w.unit_name || w.unit || 'Non assigné',
-        department: w.department_name || w.department || 'Non assigné',
+        unit: w.unit_name || 'Non assigné',
+        department: w.department_name || 'Non assigné',
         unitId: w.unit_id || null,
         departmentId: w.department_id || null,
-        position: w.position || 'Non assigné',
         bloodType: (w.blood_type || 'O+') as MedicalProfile['bloodType'],
         lastSeen: w.last_seen || new Date().toISOString(),
         joinDate: w.created_at || new Date().toISOString(),
@@ -584,7 +580,6 @@ export function EmergencyProvider({ children }: { children: React.ReactNode }) {
       phone: payload.phone,
       unit_id: payload.unit || null,
       department_id: payload.department || null,
-      position: payload.position,
       role: payload.role,
     }, token);
 
@@ -600,11 +595,10 @@ export function EmergencyProvider({ children }: { children: React.ReactNode }) {
         employeeId: w.employee_id,
         status: w.is_active ? 'active' : 'offline',
         phone: w.phone || 'N/A',
-        unit: w.unit_name || w.unit || 'Non assigné',
-        department: w.department_name || w.department || 'Non assigné',
+        unit: w.unit_name || 'Non assigné',
+        department: w.department_name || 'Non assigné',
         unitId: w.unit_id || null,
         departmentId: w.department_id || null,
-        position: w.position || 'Non assigné',
         bloodType: (existing?.bloodType || 'O+') as MedicalProfile['bloodType'],
         lastSeen: w.last_seen || new Date().toISOString(),
         joinDate: w.created_at || new Date().toISOString(),

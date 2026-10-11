@@ -100,12 +100,12 @@ export default function DepartmentsPage() {
               </div>
               
               {/* Units */}
-              <div className="p-3 flex flex-col gap-2 bg-[#0a0a0a]">
+              <div className="p-3 flex flex-col gap-2" style={{ background: 'var(--sos-bg-surface-2)' }}>
                 {d.units.map(u => (
-                  <div key={u.id} className="flex items-center justify-between px-3 py-2 rounded-lg" style={{ background: '#111', border: '1px solid #222', opacity: u.is_active ? 1 : 0.5 }}>
+                  <div key={u.id} className="flex items-center justify-between px-3 py-2 rounded-lg" style={{ background: 'var(--sos-bg-surface)', border: '1px solid var(--sos-border)', opacity: u.is_active ? 1 : 0.5 }}>
                     <div className="flex items-center gap-2">
-                      <Box className="w-3.5 h-3.5 text-gray-500" />
-                      <span className="text-sm text-gray-300">{u.name}</span>
+                      <Box className="w-3.5 h-3.5" style={{ color: 'var(--sos-text-muted)' }} />
+                      <span className="text-sm" style={{ color: 'var(--sos-text-primary)' }}>{u.name}</span>
                     </div>
                     <div className="flex items-center gap-1 opacity-0 hover:opacity-100 transition-opacity" style={{ opacity: 1 }}>
                       <button onClick={() => setModalMode({ type: 'unit_edit', targetId: u.id, parentId: d.id, init: u.name })} className="w-6 h-6 flex items-center justify-center"><Pencil className="w-3 h-3 text-blue-400" /></button>

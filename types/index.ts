@@ -43,7 +43,6 @@ export interface Worker {
   department: string;
   unitId?: string;
   departmentId?: string;
-  position?: string;
   phone: string;
   status: WorkerStatus;
   bloodType: MedicalProfile['bloodType'];

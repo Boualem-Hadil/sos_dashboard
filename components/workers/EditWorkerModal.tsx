@@ -60,7 +60,6 @@ export function EditWorkerModal({ worker, onClose, onSuccess }: Props) {
     phone: worker.phone === 'Non spécifié' ? '' : worker.phone,
     unit: worker.unitId || '',
     department: worker.departmentId || '',
-    position: worker.position === 'Poste non spécifié' || worker.position === 'Non assigné' ? '' : worker.position,
   });
 
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -217,31 +216,20 @@ export function EditWorkerModal({ worker, onClose, onSuccess }: Props) {
               </div>
             </div>
 
-            {/* Position + role */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label style={LABEL_STYLE}>Poste</label>
-                <input
-                  id="edit-worker-position"
-                  style={INPUT_STYLE}
-                  value={form.position}
-                  onChange={set('position')}
-                />
-              </div>
-              <div>
-                <label style={LABEL_STYLE}>Rôle</label>
-                <select
-                  id="edit-worker-role"
-                  style={{ ...INPUT_STYLE, cursor: 'pointer' }}
-                  value={form.role ?? ''}
-                  onChange={set('role')}
-                >
-                  <option value="">— Inchangé —</option>
-                  {roles.map(r => (
-                    <option key={r.value} value={r.value}>{r.label}</option>
-                  ))}
-                </select>
-              </div>
+            {/* Row: role */}
+            <div>
+              <label style={LABEL_STYLE}>Rôle</label>
+              <select
+                id="edit-worker-role"
+                style={{ ...INPUT_STYLE, cursor: 'pointer' }}
+                value={form.role ?? ''}
+                onChange={set('role')}
+              >
+                <option value="">— Inchangé —</option>
+                {roles.map(r => (
+                  <option key={r.value} value={r.value}>{r.label}</option>
+                ))}
+              </select>
             </div>
 
             {/* Error */}
