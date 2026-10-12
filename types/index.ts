@@ -2,7 +2,7 @@
 // Types & Interfaces for EchoAlert Dashboard
 // ============================================================
 
-export type EmergencyType = 'cardiac' | 'trauma' | 'fire' | 'respiratory' | 'neurological' | 'poisoning';
+export type EmergencyType = 'cardiac' | 'trauma' | 'fire' | 'respiratory' | 'neurological' | 'poisoning' | 'medical' | 'police';
 export type Severity = 'critical' | 'moderate' | 'minor';
 export type WorkerStatus = 'active' | 'offline' | 'emergency';
 export type EmergencyState = 'idle' | 'active' | 'resolved';
@@ -74,6 +74,7 @@ export interface Emergency {
   workerBadge: string;
   workerPhone?: string;              // NEW: for direct call button
   unit: string;
+  department?: string;
   type: EmergencyType;
   severity: Severity;
   status: EmergencyStatus;

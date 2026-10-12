@@ -144,8 +144,12 @@ function reducer(state: EmergencyState, action: Action): EmergencyState {
     case 'RESOLVE_EMERGENCY': {
       const selectedId = state.selectedEmergencyId;
       const resolved = state.activeEmergencies.find(e => e.id === selectedId);
+      const nowStr = new Date().toISOString();
+      const diffMin = resolved?.startedAt
+        ? Math.max(0, Math.round((new Date(nowStr).getTime() - new Date(resolved.startedAt).getTime()) / 60000))
+        : 0;
       const enriched = resolved
-        ? { ...resolved, status: 'resolved' as const, resolvedAt: new Date().toISOString() }
+        ? { ...resolved, status: 'resolved' as const, resolvedAt: nowStr, duration: diffMin }
         : null;
       const remaining = state.activeEmergencies.filter(e => e.id !== selectedId);
       const nextSelectedId = remaining.length > 0 ? remaining[0].id : null;
@@ -186,7 +190,11 @@ function reducer(state: EmergencyState, action: Action): EmergencyState {
       const id = action.payload;
       const resolved = state.activeEmergencies.find(e => e.id === id);
       if (!resolved) return state;
-      const enriched = { ...resolved, status: 'resolved' as const, resolvedAt: new Date().toISOString() };
+      const nowStr = new Date().toISOString();
+      const diffMin = resolved.startedAt
+        ? Math.max(0, Math.round((new Date(nowStr).getTime() - new Date(resolved.startedAt).getTime()) / 60000))
+        : 0;
+      const enriched = { ...resolved, status: 'resolved' as const, resolvedAt: nowStr, duration: diffMin };
       const remaining = state.activeEmergencies.filter(e => e.id !== id);
       const wasSelected = state.selectedEmergencyId === id;
       const nextSelectedId = wasSelected
@@ -344,6 +352,15 @@ export function EmergencyProvider({ children }: { children: React.ReactNode }) {
         // Map backend snake_case to frontend camelCase expected by Dashboard
         const mappedEmergencies = (fetchedEmergencies || []).map((e: any) => {
           const worker = workers.find((w: any) => w.id === e.user_id);
+          let duration: number | undefined = undefined;
+          if (e.duration_minutes != null && !isNaN(Number(e.duration_minutes))) {
+            duration = Number(e.duration_minutes);
+          } else if (e.duration != null && !isNaN(Number(e.duration))) {
+            duration = Number(e.duration);
+          } else if (e.started_at && e.resolved_at) {
+            const diffMs = new Date(e.resolved_at).getTime() - new Date(e.started_at).getTime();
+            duration = diffMs >= 0 ? Math.round(diffMs / 60000) : 0;
+          }
           return {
             id: e.id,
             workerId: e.user_id || 'unknown',
@@ -356,10 +373,12 @@ export function EmergencyProvider({ children }: { children: React.ReactNode }) {
             status: e.status,
             startedAt: e.started_at,
             resolvedAt: e.resolved_at,
+            duration: duration,
             voiceTranscript: e.voice_transcript || undefined,
             workerName: worker ? `${worker.firstName} ${worker.lastName}`.trim() : 'Unknown Worker',
             workerBadge: worker?.employeeId || '',
-            unit: worker?.unit || 'Non assignée',
+            unit: worker?.unit || e.unit_name || 'Non assignée',
+            department: worker?.department || e.department_name || 'Non assigné',
             companyId: e.company_id || '',
             responderType: e.responder_type,
             etaMinutes: e.eta_minutes,
@@ -482,11 +501,20 @@ export function EmergencyProvider({ children }: { children: React.ReactNode }) {
       const res = await resolveEmergencyApi(idOrEmergency, statusArg, token, responderType, etaMinutes, notes);
       const apiEmergency = res?.data;
       if (apiEmergency) {
+        const started = apiEmergency.started_at || currentEmergency?.startedAt;
+        const resolved = apiEmergency.resolved_at || new Date().toISOString();
+        let duration: number | undefined = undefined;
+        if (started && resolved) {
+          const diffMs = new Date(resolved).getTime() - new Date(started).getTime();
+          duration = diffMs >= 0 ? Math.round(diffMs / 60000) : 0;
+        }
         const enriched: Emergency = {
           ...(currentEmergency ?? ({} as Emergency)),
           id: apiEmergency.id,
           status: apiEmergency.status,
-          resolvedAt: apiEmergency.resolved_at,
+          startedAt: started,
+          resolvedAt: resolved,
+          duration: duration,
           notes: apiEmergency.notes,
           responderType: apiEmergency.responder_type,
           etaMinutes: apiEmergency.eta_minutes,

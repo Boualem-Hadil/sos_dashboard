@@ -4,21 +4,25 @@ import { History as HistoryIcon, Search, Download, Filter } from 'lucide-react';
 import { caGetHistory } from '@/lib/company-admin-service';
 const TYPE_LABELS: Record<string, string> = {
   cardiac: 'Cardiaque',
-  trauma: 'Traumatisme',
   respiratory: 'Respiratoire',
+  trauma: 'Traumatisme',
+  fire: 'Incendie',
   neurological: 'Neurologique',
   poisoning: 'Intoxication',
-  fire: 'Incendie',
+  medical: 'Médical',
+  police: 'Police',
   other: 'Autre',
 };
 
 const TYPE_COLORS: Record<string, string> = {
   cardiac: '#E53935',
-  trauma: '#FF9800',
   respiratory: '#2196F3',
+  trauma: '#FF9800',
+  fire: '#FF5722',
   neurological: '#9C27B0',
   poisoning: '#4CAF50',
-  fire: '#FF5722',
+  medical: '#E53935',
+  police: '#2196F3',
   other: '#9E9E9E',
 };
 
@@ -82,7 +86,7 @@ export default function HistoryPage() {
         <table className="w-full text-sm">
           <thead>
             <tr style={{ borderBottom: '1px solid var(--sos-border)' }}>
-              {['Date', 'Type', 'Statut', 'Département', 'Durée'].map(h => (
+              {['Date', 'Type', 'Statut', 'Département / Unité', 'Durée'].map(h => (
                 <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--sos-text-muted)' }}>{h}</th>
               ))}
             </tr>
@@ -93,12 +97,15 @@ export default function HistoryPage() {
             ) : events.length === 0 ? (
               <tr><td colSpan={6} className="px-4 py-8 text-center text-sm" style={{ color: 'var(--sos-text-muted)' }}>Aucun enregistrement trouvé.</td></tr>
             ) : events.map((e, i) => {
-              const color = TYPE_COLORS[e.type as keyof typeof TYPE_COLORS] || '#808080';
-              const label = TYPE_LABELS[e.type as keyof typeof TYPE_LABELS] || e.type;
+              const typeKey = (e.type || '').toLowerCase();
+              const color = TYPE_COLORS[typeKey] || '#808080';
+              const label = TYPE_LABELS[typeKey] || e.type;
               let dur = '—';
-              if (e.started_at && e.resolved_at) {
+              if (e.duration_minutes != null) {
+                dur = e.duration_minutes <= 0 ? '< 1 min' : `${e.duration_minutes} min`;
+              } else if (e.started_at && e.resolved_at) {
                 const diff = Math.round((new Date(e.resolved_at).getTime() - new Date(e.started_at).getTime()) / 60000);
-                dur = `${diff} min`;
+                dur = diff <= 0 ? '< 1 min' : `${diff} min`;
               }
               return (
                 <tr key={e.id} style={{ borderBottom: i < events.length - 1 ? '1px solid var(--sos-border-subtle)' : undefined }} className="hover:bg-[var(--sos-bg-hover)] transition-colors">
@@ -111,7 +118,10 @@ export default function HistoryPage() {
                       {e.status === 'resolved' ? 'Résolue' : 'Fausse alerte'}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-xs" style={{ color: 'var(--sos-text-muted)' }}>{e.department_name || e.department || '—'}</td>
+                  <td className="px-4 py-3">
+                    <div className="text-sm" style={{ color: 'var(--sos-text-primary)' }}>{e.department_name || e.department || '—'}</div>
+                    <div className="text-xs" style={{ color: 'var(--sos-text-muted)' }}>{e.unit_name || e.unit || '—'}</div>
+                  </td>
                   <td className="px-4 py-3 font-mono text-xs" style={{ color: 'var(--sos-text-secondary)' }}>{dur}</td>
                 </tr>
               );

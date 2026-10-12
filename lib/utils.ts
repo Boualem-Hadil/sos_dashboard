@@ -38,13 +38,27 @@ export function formatElapsedTime(startedAt: string): string {
 }
 
 export function formatDuration(minutes: number): string {
+  if (minutes <= 0) return '< 1 min';
   if (minutes < 60) return `${minutes} min`;
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
-  return `${h}h ${m}min`;
+  return m > 0 ? `${h}h ${m}min` : `${h}h`;
 }
 
-export function getEmergencyTypeLabel(type: EmergencyType): string {
+export function getEmergencyDurationMinutes(e: { startedAt?: string; resolvedAt?: string; duration?: number }): number | null {
+  if (e.duration !== undefined && e.duration !== null && !isNaN(e.duration)) {
+    return e.duration;
+  }
+  if (e.startedAt && e.resolvedAt) {
+    const diffMs = new Date(e.resolvedAt).getTime() - new Date(e.startedAt).getTime();
+    if (diffMs < 0) return 0;
+    return Math.round(diffMs / 60000);
+  }
+  return null;
+}
+
+export function getEmergencyTypeLabel(type: string): string {
+  const normalized = (type || '').toLowerCase();
   const labels: Record<string, string> = {
     cardiac:      'Cardiaque',
     trauma:       'Traumatisme',
@@ -55,7 +69,7 @@ export function getEmergencyTypeLabel(type: EmergencyType): string {
     medical:      'Médical',
     police:       'Police',
   };
-  return labels[type] || type;
+  return labels[normalized] || type;
 }
 
 export function getSeverityLabel(severity: Severity): string {

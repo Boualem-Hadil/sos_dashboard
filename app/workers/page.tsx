@@ -321,7 +321,7 @@ export default function WorkersPage() {
           <table className="w-full text-sm">
             <thead>
               <tr style={{ borderBottom: '1px solid var(--sos-border)' }}>
-                {['', 'Nom', 'ID Employé', 'Unité', 'Statut', 'Groupe Sanguin', 'Dernière activité', 'Actions'].map(h => (
+                {['', 'Nom', 'ID Employé', 'Département / Unité', 'Statut', 'Groupe Sanguin', 'Dernière activité', 'Actions'].map(h => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--sos-text-muted)' }}>{h}</th>
                 ))}
               </tr>
@@ -341,7 +341,10 @@ export default function WorkersPage() {
                     </td>
                     <td className="px-4 py-3 font-medium" style={{ color: 'var(--sos-text-primary)' }}>{w.firstName} {w.lastName}</td>
                     <td className="px-4 py-3 font-mono text-xs" style={{ color: 'var(--sos-text-muted)' }}>{w.employeeId}</td>
-                    <td className="px-4 py-3 text-xs" style={{ color: 'var(--sos-text-secondary)' }}>{w.unit}</td>
+                    <td className="px-4 py-3">
+                      <div className="text-sm font-medium" style={{ color: 'var(--sos-text-primary)' }}>{w.department || '—'}</div>
+                      <div className="text-xs" style={{ color: 'var(--sos-text-muted)' }}>{w.unit || '—'}</div>
+                    </td>
                     <td className="px-4 py-3">
                       <span className="px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 w-fit"
                         style={{ background: st.bg, color: st.color, border: `1px solid ${st.color}40`, animation: st.pulse ? 'badge-pulse 1.2s infinite' : undefined }}>

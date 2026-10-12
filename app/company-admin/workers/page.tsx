@@ -128,8 +128,8 @@ export default function WorkersPage() {
                 <td className="px-4 py-3 font-medium" style={{ color: 'var(--sos-text-primary)' }}>{w.full_name}</td>
                 <td className="px-4 py-3 font-mono text-xs" style={{ color: 'var(--sos-text-muted)' }}>{w.employee_id}</td>
                 <td className="px-4 py-3">
-                  <div className="text-sm" style={{ color: 'var(--sos-text-primary)' }}>{w.department || '—'}</div>
-                  <div className="text-xs" style={{ color: 'var(--sos-text-muted)' }}>{w.unit || '—'}</div>
+                  <div className="text-sm" style={{ color: 'var(--sos-text-primary)' }}>{w.department_name || w.department || '—'}</div>
+                  <div className="text-xs" style={{ color: 'var(--sos-text-muted)' }}>{w.unit_name || w.unit || '—'}</div>
                 </td>
                 <td className="px-4 py-3">
                   <span className="px-2 py-1 rounded-full text-xs font-bold"

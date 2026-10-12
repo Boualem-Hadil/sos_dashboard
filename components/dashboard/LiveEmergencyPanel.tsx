@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Bandage, Flame, Wind, Brain, Skull, MapPin, Phone, CheckCircle, Clock } from 'lucide-react';
+import { Heart, Bandage, Flame, Wind, Brain, Skull, Shield, MapPin, Phone, CheckCircle, Clock } from 'lucide-react';
 import { useEmergency } from '@/context/EmergencyContext';
 import { useAlarm } from '@/hooks/useAlarm';
 import { getBloodTypeColor, getEmergencyTypeLabel, getSeverityLabel, formatElapsedTime } from '@/lib/utils';
@@ -14,6 +14,8 @@ const TYPE_ICONS: Record<EmergencyType, React.ReactNode> = {
   respiratory: <Wind className="w-6 h-6" style={{ color: '#2196F3' }} />,
   neurological: <Brain className="w-6 h-6" style={{ color: '#9C27B0' }} />,
   poisoning: <Skull className="w-6 h-6" style={{ color: '#4CAF50' }} />,
+  medical: <Heart className="w-6 h-6" style={{ color: '#E53935' }} />,
+  police: <Shield className="w-6 h-6" style={{ color: '#2196F3' }} />,
 };
 
 function ElapsedTimer({ startedAt }: { startedAt: string }) {
