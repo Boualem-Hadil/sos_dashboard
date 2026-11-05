@@ -221,7 +221,7 @@ export function EmergencyChat({ emergencyId }: { emergencyId: string }) {
         ) : (
           filteredMessages.map((m) => {
             const isSystem = m.sender_role === 'system' || m.message_type === 'system';
-            const isOfficer = m.sender_role === 'safety_officer';
+            const isOfficer = m.sender_role === 'safety_officer' || m.sender_role === 'company_admin' || m.sender_role === 'super_admin';
             const isAI = m.sender_role === 'ai_assistant';
             const isWorker = !isOfficer && !isAI && !isSystem;
 

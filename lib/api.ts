@@ -231,10 +231,15 @@ export async function getMessagesApi(emergencyId: string, token: string) {
     return apiFetch(`/emergencies/${emergencyId}/messages`, {}, token);
 }
 
-export async function sendTextMessageApi(emergencyId: string, content: string, token: string) {
+export async function sendTextMessageApi(
+    emergencyId: string,
+    content: string,
+    token: string,
+    senderRole: string = 'safety_officer'
+) {
     return apiFetch(`/emergencies/${emergencyId}/messages/text`, {
         method: 'POST',
-        body: JSON.stringify({ content }),
+        body: JSON.stringify({ content, sender_role: senderRole }),
     }, token);
 }
 
